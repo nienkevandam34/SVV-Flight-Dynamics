@@ -5,20 +5,23 @@ Spyder Editor
 This is a temporary script file.
 """
 from control import ss
-from control.matlab import step, impulse, initial
+from control.matlab import step, impulse, initial, lsim
 import matplotlib.pyplot as plt
 
 import numpy as np
-from Cit_par import *
+from Cit_par_new import *
+
+print("Assemblying system matrices ...")
+
 def sysmat(C1,C2,C3):
     A = -np.linalg.inv(C1)*C2
     B = -np.linalg.inv(C1)*C3
     return A,B
 
 
-4
+
 C1_sym=np.matrix([[-2*muc*c/V0, 0, 0, 0],
-                 [0, CZadot*c/V0, 0, 0],
+                 [0, (CZadot-2*muc)*c/V0, 0, 0],
                  [0, 0, -c/V0, 0],
                  [0, Cmadot*c/V0, 0, -2*muc*KY2*c/V0]])
 
@@ -66,6 +69,10 @@ sysAsym = ss(A_asym,B_asym,C_asym,D_asym)
 sysSym=ss(A_sym, B_sym, C_sym, D_sym)
 
 
+
+print("Symmetric eigenvalues = {}".format(np.linalg.eig(A_sym)[0]))
+print("Asymmetric eigenvalues = {}".format(np.linalg.eig(A_asym)[0]))
+
 #step_response=step()
 #initial_response=initial()
 #impulse_response=impulse()
@@ -73,11 +80,34 @@ sysSym=ss(A_sym, B_sym, C_sym, D_sym)
 #[y_asym,t_asym] = step(sysAsym);
 #plt.plot(t_asym,y_asym)
 
-T=np.arange(0,10000,0.5)
-[y_sym,t_sym] = step(sysSym,T)
-y_sym[:,1]=np.array(y_sym[:,1])+np.array(alpha0)
+T=np.arange(0, 300, 0.1)
+[y_sym,t_sym,x_sym] = lsim(sysSym, np.deg2rad(0.3), T)
 
-plt.plot(t_sym,y_sym[:,1])
+fig1, ax1 = plt.subplots(2, 2)
+fig1.suptitle("Symmetric")
+
+ax1[0,0].plot(t_sym, y_sym[:,0], label="u")
+ax1[0,0].legend()
+
+ax1[0,1].plot(t_sym, np.rad2deg(y_sym[:,1] + alpha0), label=r"$\alpha$")
+ax1[0,1].legend()
+
+ax1[1,0].plot(t_sym, np.rad2deg(y_sym[:,2] + th0), label=r"$\theta$")
+ax1[1,0].legend()
+
+ax1[1,1].plot(t_sym, y_sym[:,3], label="q")
+ax1[1,1].legend()
+
+
+T=np.arange(0, 2000, 0.5)
+[y_sym,t_sym] = step(sysAsym,T)
+plt.figure()
+plt.title("ASymmetric")
+plt.plot(t_sym,y_sym[:,0], label=r"$\beta$")
+plt.plot(t_sym,y_sym[:,1], label=r"$\phi$")
+plt.plot(t_sym,y_sym[:,2], label="p")
+plt.plot(t_sym,y_sym[:,3], label="r")
+plt.legend()
 
 plt.show()
 

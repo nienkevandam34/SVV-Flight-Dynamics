@@ -8,7 +8,7 @@ import read_mat_data
 # reading reference data file
 data, unit, description, keys = read_mat_data.read_mat('reference_data.mat')
 
-
+print("Determining stability coefficients ...")
 # timing
 tb_statf1  = 1157 # sec
 te_statf1  = 1920 # sec
@@ -55,7 +55,6 @@ le_FU     = data["lh_engine_FU"][stat1_ind] * 0.453592 # kg
 re_FU     = data["rh_engine_FU"][stat1_ind] * 0.453592 # kg
 delta_e   = data["elevator_dte"][stat1_ind]            # deg
 
-
 # 6 points only
 index_6 = []
 for i in range(6):
@@ -68,7 +67,7 @@ Vc        = Vc[index_6]      # m/s
 Tm        = Tm[index_6]      # K
 le_FU     = le_FU[index_6]   # kg
 re_FU     = re_FU[index_6]   # kg
-delta_e   = delta_e[index_6] #deg
+delta_e   = delta_e[index_6] # deg
 
 
 
@@ -134,47 +133,51 @@ CD = 2*thrust_imp/(rho*S*VTAS*VTAS)
 
 
 # Results
-fig, ax = plt.subplots()
-ax.plot(aoa, CL, marker="+", markersize=5, linestyle="none", label="reference data")
-ax.set(xlabel=r"$\alpha$ [°]", ylabel=r"$C_L$")
-
 CLadeg, CLa0deg = np.polyfit(aoa, CL, 1) # lift curve gradient and CL at alpha = 0 per deg
 CLarad, CLa0rad = np.polyfit(np.deg2rad(aoa), CL, 1) # lift curve gradient and CL at alpha = 0 per rad
-ax.plot(aoa, CLadeg*aoa+CLa0deg, label="least square fit")
-plt.legend()
-
-print("\nI think that CLa per deg = {}".format(CLadeg))
-print("I think that CLa per rad = {}".format(CLarad))
-
-fig, ax = plt.subplots()
-ax.plot(aoa, CD, marker="+", markersize=5, linestyle="none", label="reference data")
-ax.set(xlabel=r"$\alpha$ [°]", ylabel=r"$C_D$")
-
-aa, bb, cc = np.polyfit(aoa, CD, 2)
-ax.plot(aoa, aa*aoa**2 + bb*aoa + cc, label="degree 2 polynomial fit")
-plt.legend()
-
-# CL vs CD
-fig, ax = plt.subplots()
-ax.plot(CL, CD, marker="+", markersize=5, linestyle="none", label="reference data")
-ax.set(xlabel=r"$C_L$", ylabel=r"$C_D$")
-plt.legend()
-
-# CL^2 vs CD (should be straight line)
-fig, ax = plt.subplots()
-ax.plot(CL**2, CD, marker="+", markersize=5, linestyle="none", label="reference data")
-ax.set(xlabel=r"$C_L^2$", ylabel=r"$C_D$")
-
 a2, CD0 = np.polyfit(CL**2, CD, 1)
-ax.plot(CL**2, a2*(CL**2) + CD0, label="degree 1 polynomial fit")
-plt.legend()
-
 e = (CL**2)/(CD-CD0)/(np.pi*A)
 
-print("I think that CD0 = {}".format(CD0))
-print("I think that e = {}".format(e[-2]))
 
-plt.show()
+# =============================================================================
+# fig, ax = plt.subplots()
+# ax.plot(aoa, CL, marker="+", markersize=5, linestyle="none", label="reference data")
+# ax.set(xlabel=r"$\alpha$ [°]", ylabel=r"$C_L$")
+# 
+# ax.plot(aoa, CLadeg*aoa+CLa0deg, label="least square fit")
+# plt.legend()
+# 
+# print("\nI think that CLa per deg = {}".format(CLadeg))
+# print("I think that CLa per rad = {}".format(CLarad))
+# 
+# fig, ax = plt.subplots()
+# ax.plot(aoa, CD, marker="+", markersize=5, linestyle="none", label="reference data")
+# ax.set(xlabel=r"$\alpha$ [°]", ylabel=r"$C_D$")
+# 
+# aa, bb, cc = np.polyfit(aoa, CD, 2)
+# ax.plot(aoa, aa*aoa**2 + bb*aoa + cc, label="degree 2 polynomial fit")
+# plt.legend()
+# 
+# # CL vs CD
+# fig, ax = plt.subplots()
+# ax.plot(CL, CD, marker="+", markersize=5, linestyle="none", label="reference data")
+# ax.set(xlabel=r"$C_L$", ylabel=r"$C_D$")
+# plt.legend()
+# 
+# # CL^2 vs CD (should be straight line)
+# fig, ax = plt.subplots()
+# ax.plot(CL**2, CD, marker="+", markersize=5, linestyle="none", label="reference data")
+# ax.set(xlabel=r"$C_L^2$", ylabel=r"$C_D$")
+# 
+# 
+# ax.plot(CL**2, a2*(CL**2) + CD0, label="degree 1 polynomial fit")
+# plt.legend()
+# 
+# print("I think that CD0 = {}".format(CD0))
+# print("I think that e = {}".format(e[-2]))
+# 
+# plt.show()
+# =============================================================================
 
 
 
@@ -186,8 +189,8 @@ plt.show()
 # Stationary flight condition
 hp0    = hp[0]       # pressure altitude in the stationary flight condition [m]
 V0     = VTAS[0]     # true airspeed in the stationary flight condition [m/sec]
-alpha0 = aoa[0]      # angle of attack in the stationary flight condition [rad]
-th0    = data["Ahrs1_Pitch"][stat1_ind][0] # pitch angle in the stationary flight condition [rad]
+alpha0 = np.deg2rad(aoa[0])      # angle of attack in the stationary flight condition [rad]
+th0    = np.deg2rad(data["Ahrs1_Pitch"][stat1_ind][0]) # pitch angle in the stationary flight condition [rad]
 
 # Aircraft mass
 m      = m[0]        # mass [kg]
