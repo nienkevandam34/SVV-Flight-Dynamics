@@ -6,7 +6,7 @@ import numpy as np
 # Stationary flight condition
 
 hp0    =1538.       	 # pressure altitude in the stationary flight condition [m]
-V0     =90.3689             # true airspeed in the stationary flight condition [m/sec]
+V0     =136.238             # true airspeed in the stationary flight condition [m/sec]
 alpha0 =np.deg2rad(1.3396058378128493)       # angle of attack in the stationary flight condition [rad]
 th0    =np.deg2rad(1.3348)             # pitch angle in the stationary flight condition [rad]
 
@@ -19,8 +19,8 @@ CD0    =0.02081            # Zero lift drag coefficient [ ]
 CLa    =4.58           # Slope of CL-alpha curve [ ]
 
 # Longitudinal stability
-Cma    =-.0004           # longitudinal stabilty [ ]
-Cmde   =-0.000005         # elevator effectiveness [ ]
+Cma    =-0.5626          # longitudinal stabilty [ ]
+Cmde   =-1.1642         # elevator effectiveness [ ]
 
 # Aircraft geometry
 
@@ -69,7 +69,8 @@ depsda = 4 / (A + 2)            # Downwash gradient [ ]
 
 CL = 2 * W / (rho * V0 ** 2 * S)              # Lift coefficient [ ]
 CD = CD0 + (CLa * alpha0) ** 2 / (pi * A * e) # Drag coefficient [ ]
-
+print(CL)
+print(CD)
 # Stabiblity derivatives
 
 CX0    = W * sin(th0) / (0.5 * rho * V0 ** 2 * S)
