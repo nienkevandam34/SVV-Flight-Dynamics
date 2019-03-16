@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 """
 Spyder Editor
-
 This is a temporary script file.
 """
 from control import ss
@@ -20,25 +19,25 @@ def sysmat(C1,C2,C3):
 
 
 
-C1_sym=np.matrix([[-2*muc*c/V0, 0, 0, 0],
+C1_sym=np.matrix([[-2*muc*c/(V0**2), 0, 0, 0],
                  [0, (CZadot-2*muc)*c/V0, 0, 0],
                  [0, 0, -c/V0, 0],
-                 [0, Cmadot*c/V0, 0, -2*muc*KY2*c/V0]])
+                 [0, Cmadot*c/V0, 0, -2*muc*KY2*c/(V0**2)]])
 
-C2_sym=np.matrix([[CXu, CXa, CZ0, CXq],
-                 [CZu, CZa, -CX0, CZq+2*muc],
-                 [0, 0, 0, 1],
-                 [Cmu, Cma, 0, Cmq]])
+C2_sym=np.matrix([[CXu/V0, CXa, CZ0, CXq*c/V0],
+                 [CZu/V0, CZa, -CX0, (CZq+2*muc)*c/V0],
+                 [0, 0, 0, c/V0],
+                 [Cmu/V0, Cma, 0, Cmq*c/V0]])
 
-C3_sym=np.matrix([[CXde*V0],
+C3_sym=np.matrix([[CXde],
                   [CZde],
                   [0],
-                  [Cmde*V0/c]])
+                  [Cmde]])
 
-C1_asym = np.matrix([[(CYb-2*mub)*(b/V0),0,0,0],
+C1_asym = np.matrix([[(CYbdot-2*mub)*(b/V0),0,0,0],
              [0,-.5*b/V0,0,0],
              [0,0,-2*mub*KX2*(b**2)/(V0**2),2*mub*KXZ*(b**2)/(V0**2)],
-             [Cnb*b/V0,0,2*mub*KXZ*(b**2)/(V0**2),-2*mub*KZ2*(b**2)/(V0**2)]])
+             [Cnbdot*b/V0,0,2*mub*KXZ*(b**2)/(V0**2),-2*mub*KZ2*(b**2)/(V0**2)]])
     
     
 C2_asym=np.matrix([[CYb, CL, CYp*b/(2*V0), (CYr-4*mub)*b/(2*V0)],
@@ -110,4 +109,3 @@ plt.plot(t_sym,y_sym[:,3], label="r")
 plt.legend()
 
 plt.show()
-
