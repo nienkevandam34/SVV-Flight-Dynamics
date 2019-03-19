@@ -14,8 +14,8 @@ import numpy as np
 
 hp0    =6093.2 * 0.3048       	       # pressure altitude in the stationary flight condition [m]
 V0     =160.09 * 0.5144444             # true airspeed in the stationary flight condition [m/sec]
-alpha0 =np.deg2rad(5.1)               # angle of attack in the stationary flight condition [rad]
-th0    =np.deg2rad(4.0)#8.83)               # pitch angle in the stationary flight condition [rad]
+alpha0 =np.deg2rad(5.3)               # angle of attack in the stationary flight condition [rad]
+th0    =np.deg2rad(4.8)#8.83)               # pitch angle in the stationary flight condition [rad]
 
 # Aircraft mass
 m      = 6289.6         # mass [kg]
@@ -75,7 +75,7 @@ depsda = 4 / (A + 2)            # Downwash gradient [ ]
 # Lift and drag coefficient
 
 CL = 2 * W / (rho * V0 ** 2 * S)              # Lift coefficient [ ]
-CD = CD0 + (CLa * alpha0) ** 2 / (pi * A * e) # Drag coefficient [ ]
+#CD = CD0 + (CLa * alpha0) ** 2 / (pi * A * e) # Drag coefficient [ ]
 
 # Stabiblity derivatives
 

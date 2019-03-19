@@ -7,15 +7,22 @@ This is a temporary script file.
 from control import ss
 from control.matlab import step, impulse, initial, lsim
 import matplotlib.pyplot as plt
+import numpy as np
 
 import grafiekjesmakenyay
 
-import numpy as np
-from Cit_par_appC import *
+#from Cit_par_appC import *
+
+import Cit_par_new
 
 import read_mat_data
 
 data, unit, description, keys = read_mat_data.read_mat("reference_data.mat")
+
+
+
+# collect parameters derived from stationary measurements
+Cmde, Cma = Cit_par_new.stat_meas_2()
 
 print("Assemblying system matrices ...")
 
@@ -24,61 +31,72 @@ def sysmat(C1,C2,C3):
     B = -np.linalg.inv(C1)*C3
     return A,B
 
+def sym_matrices(c, muc, V0, KY2, CX0, CXa, CXde, CXu, CXq, CZ0, CZa, CZadot, 
+                 CZde, CZu, CZq, Cmadot, Cmu, Cmq):
+    
+    C1_sym=np.matrix([[-2*muc*c/(V0**2), 0, 0, 0],
+                     [0, (CZadot-2*muc)*c/V0, 0, 0],
+                     [0, 0, -c/V0, 0],
+                     [0, Cmadot*c/V0, 0, -2*muc*KY2*c/(V0**2)]])
+    
+    C2_sym=np.matrix([[CXu/V0, CXa, CZ0, CXq*c/V0],
+                     [CZu/V0, CZa, -CX0, (CZq+2*muc)*c/V0],
+                     [0, 0, 0, c/V0],
+                     [Cmu/V0, Cma, 0, Cmq*c/V0]])
+    
+    C3_sym=np.matrix([[CXde],
+                      [CZde],
+                      [0],
+                      [Cmde]])
+    
+    ssm = sysmat(C1_sym,C2_sym,C3_sym)
+    
+    A_sym = ssm[0]
+    B_sym = ssm[1]
+    
+    C_sym=np.identity(4)
+    D_sym=np.zeros((4,1))
+    
+    return ss(A_sym, B_sym, C_sym, D_sym)
 
 
-C1_sym=np.matrix([[-2*muc*c/(V0**2), 0, 0, 0],
-                 [0, (CZadot-2*muc)*c/V0, 0, 0],
-                 [0, 0, -c/V0, 0],
-                 [0, Cmadot*c/V0, 0, -2*muc*KY2*c/(V0**2)]])
-
-C2_sym=np.matrix([[CXu/V0, CXa, CZ0, CXq*c/V0],
-                 [CZu/V0, CZa, -CX0, (CZq+2*muc)*c/V0],
-                 [0, 0, 0, c/V0],
-                 [Cmu/V0, Cma, 0, Cmq*c/V0]])
-
-C3_sym=np.matrix([[CXde],
-                  [CZde],
-                  [0],
-                  [Cmde]])
-
-C1_asym = np.matrix([[(CYbdot-2*mub)*(b/V0),0,0,0],
-             [0,-.5*b/V0,0,0],
-             [0,0,-2*mub*KX2*(b**2)/(V0**2),2*mub*KXZ*(b**2)/(V0**2)],
-             [Cnbdot*b/V0,0,2*mub*KXZ*(b**2)/(V0**2),-2*mub*KZ2*(b**2)/(V0**2)]])
+def asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, CYdr, CYda,
+                  CL, Clda, Clb, Clp, Clr, Cldr, Cnda, Cnb, Cnbdot, Cnp, Cnr, 
+                  Cndr):
+    
+    C1_asym = np.matrix([[(CYbdot-2*mub)*(b/V0),0,0,0],
+                 [0,-.5*b/V0,0,0],
+                 [0,0,-2*mub*KX2*(b**2)/(V0**2),2*mub*KXZ*(b**2)/(V0**2)],
+                 [Cnbdot*b/V0,0,2*mub*KXZ*(b**2)/(V0**2),-2*mub*KZ2*(b**2)/(V0**2)]])
+        
+        
+    C2_asym=np.matrix([[CYb, CL, CYp*b/(2*V0), (CYr-4*mub)*b/(2*V0)],
+                        [0, 0, b/(2*V0), 0],
+                        [Clb, 0, Clp*b/(2*V0), Clr*b/(2*V0)],
+                        [Cnb, 0, Cnp*b/(2*V0), Cnr*b/(2*V0)]])
+    C3_asym=np.matrix([[CYda, CYdr],
+                       [0, 0],
+                       [Clda, Cldr],
+                       [Cnda, Cndr]])
+    
+    asm = sysmat(C1_asym,C2_asym,C3_asym)
     
     
-C2_asym=np.matrix([[CYb, CL, CYp*b/(2*V0), (CYr-4*mub)*b/(2*V0)],
-                    [0, 0, b/(2*V0), 0],
-                    [Clb, 0, Clp*b/(2*V0), Clr*b/(2*V0)],
-                    [Cnb, 0, Cnp*b/(2*V0), Cnr*b/(2*V0)]])
-C3_asym=np.matrix([[CYda, CYdr],
-                   [0, 0],
-                   [Clda, Cldr],
-                   [Cnda, Cndr]])
-
-asm = sysmat(C1_asym,C2_asym,C3_asym)
-ssm = sysmat(C1_sym,C2_sym,C3_sym)
-
-A_asym = asm[0]
-B_asym = asm[1]
-
-A_sym = ssm[0]
-B_sym = ssm[1]
-
-C_asym=np.identity(4)
-D_asym=np.zeros((4,2))
-C_sym=np.identity(4)
-D_sym=np.zeros((4,1))
+    A_asym = asm[0]
+    B_asym = asm[1]
+    
+    
+    
+    C_asym=np.identity(4)
+    D_asym=np.zeros((4,2))
+    
+    return ss(A_asym,B_asym,C_asym,D_asym)
 
 
-sysAsym = ss(A_asym,B_asym,C_asym,D_asym)
-sysSym=ss(A_sym, B_sym, C_sym, D_sym)
-
-
-sym_eig = np.linalg.eig(A_sym)[0]
-asym_eig = np.linalg.eig(A_asym)[0]
-print("\nSymmetric eigenvalues: \nshort period = {}\nphugoid = {}".format(sym_eig[0], sym_eig[2]))
-print("\nAsymmetric eigenvalues: \nHighly damped aperiodic rolling = {}\nDutch roll = {}\nAperiodic spiral motion = {}\n".format(asym_eig[0], asym_eig[1], asym_eig[3]))
+#sym_eig = np.linalg.eig(A_sym)[0]
+#asym_eig = np.linalg.eig(A_asym)[0]
+#print("\nSymmetric eigenvalues: \nshort period = {}\nphugoid = {}".format(sym_eig[0], sym_eig[2]))
+#print("\nAsymmetric eigenvalues: \nHighly damped aperiodic rolling = {}\nDutch roll = {}\nAperiodic spiral motion = {}\n".format(asym_eig[0], asym_eig[1], asym_eig[3]))
 
 
 
@@ -89,27 +107,29 @@ print("\nAsymmetric eigenvalues: \nHighly damped aperiodic rolling = {}\nDutch r
 # Dutch Roll Yaw Damping: 62:47 - 65:20
 # Spiral: 65:20 - ...
 
-
-
-#step_response=step()
-#initial_response=initial()
-#impulse_response=impulse()
-
-#[y_asym,t_asym] = step(sysAsym);
-#plt.plot(t_asym,y_asym)
-
 name_sym_eigenm = ["Phugoid", "Short Period"]
-
-nr_sym_eigenm = len(name_sym_eigenm)
-nr_asym_eigenm = 4
 
 T_st_sym = [(53, 40), (60,25)]
 T_en_sym = [(57, 30), (60,31)]
 
+T_st_sym_s = [T_st_sym[0][0]*60 + T_st_sym[0][1], T_st_sym[1][0]*60 + T_st_sym[1][1]]
+T_en_sym_s = [T_en_sym[0][0]*60 + T_en_sym[0][1], T_en_sym[1][0]*60 + T_en_sym[1][1]]
+
 inp_sym = [-0.3259, -1.74]
 
-for i in range(nr_sym_eigenm):
+for i in range(len(name_sym_eigenm)):
     T = np.arange(0, T_en_sym[i][0]*60 + T_en_sym[i][1] - T_st_sym[i][0]*60 - T_st_sym[i][1] + 0.1, 0.1)
+    
+    (hp0, V0, alpha0, th0, m, ef, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
+     KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, 
+     CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb, 
+     CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, 
+     Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b) = Cit_par_new.stab_coef(T_st_sym_s[i], 
+                                                                 T_en_sym_s[i])
+    
+    sysSym = sym_matrices(c, muc, V0, KY2, CX0, CXa, CXde, CXu, CXq, CZ0, CZa, 
+                          CZadot, CZde, CZu, CZq, Cmadot, Cmu, Cmq)
+    
     [y_sym,t_sym,x_sym] = lsim(sysSym, inp_sym[i], T)
     
     #tlistu, delistu = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "Dadc1_tas", data)
@@ -146,43 +166,78 @@ for i in range(nr_sym_eigenm):
 
 
 
-tlistb, delistb = grafiekjesmakenyay.plot_real_data((61,57), (62,10), "Fms1_trueHeading", data)
-tlisth, delisth = grafiekjesmakenyay.plot_real_data((61,57), (62,10), "Ahrs1_Roll", data)
-tlistp, delistp = grafiekjesmakenyay.plot_real_data((61,57), (62,10), "Ahrs1_bYawRate", data)
-tlistr, delistr = grafiekjesmakenyay.plot_real_data((61,57), (62,10), "Ahrs1_bRollRate", data)
-
-T=np.arange(0, len(tlistb)/10, 0.1)
-dummy, input_dutchroll = grafiekjesmakenyay.plot_real_data((61,57), (62,10), "delta_r", data)
-[y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((np.zeros(len(T)), input_dutchroll)).T, T)
-
-figt, axt = plt.subplots(1, 1)
-axt.plot(T, input_dutchroll)
 
 
-fig2, ax2 = plt.subplots(2, 2)
-fig2.suptitle("Asymmetric")
+name_asym_eigenm = ["Aperiodic Roll", "Dutch Roll", "Spiral"]
 
-#ax2[0,0].plot(tlistb-tlistb[0], delistb, label="test data")
-ax2[0,0].plot(tlistb-tlistb[0], y_asym[:,0], label=r"$\beta$", color="orange")
-ax2[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\beta$ [°]", title="sideslip angle")
-ax2[0,0].legend()
+T_st_asym = [(59,10), (61,57), (65,22)]
+T_en_asym = [(59,30), (62,35), (65,50)]
 
-ax2[0,1].plot(tlisth-tlisth[0], delisth, label="test data")
-ax2[0,1].plot(tlisth-tlisth[0], y_asym[:,1], label=r"$\phi$")
-ax2[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\phi$ [°]", title="roll angle")
-ax2[0,1].legend()
+T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
+T_en_asym_s = [T_en_asym[0][0]*60 + T_en_asym[0][1], T_en_asym[1][0]*60 + T_en_asym[1][1], T_en_asym[2][0]*60 + T_en_asym[2][1]]
 
-ax2[1,0].plot(tlistp-tlistp[0], delistp, label="test data")
-ax2[1,0].plot(tlistp-tlistp[0], y_asym[:,2], label="p")
-ax2[1,0].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="yaw rate")
-ax2[1,0].legend()
+nr_points_aroll = (T_en_asym[0][0]*60+T_en_asym[0][1] - (T_st_asym[0][0]*60+T_st_asym[0][1]))*10 + 1
+input_aroll = np.vstack((np.ones(nr_points_aroll)*3, np.zeros(nr_points_aroll)))
+dummy, input_dutchroll = grafiekjesmakenyay.plot_real_data(T_st_asym[1], T_en_asym[1], "delta_r", data)
+inp_asym = [input_aroll.T, np.vstack((np.zeros(len(input_dutchroll)), input_dutchroll)).T, 0.0]
 
-ax2[1,1].plot(tlistr-tlistr[0], delistr, label="test data")
-ax2[1,1].plot(tlistr-tlistr[0], y_asym[:,3], label="r")
-ax2[1,1].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="roll rate")
-ax2[1,1].legend()
 
-plt.legend()
+for i in range(len(name_asym_eigenm)):
+    tlistb, delistb = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Fms1_trueHeading", data)
+    tlisth, delisth = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_Roll", data)
+    tlistp, delistp = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_bYawRate", data)
+    tlistr, delistr = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_bRollRate", data)
+    
+    T = np.arange(0, T_en_asym[i][0]*60 + T_en_asym[i][1] - T_st_asym[i][0]*60 - T_st_asym[i][1] + 0.1, 0.1)
+    
+    (hp0, V0, alpha0, th0, m, ef, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
+     KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, 
+     CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb, 
+     CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, 
+     Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b) = Cit_par_new.stab_coef(T_st_asym_s[i], 
+                                                                 T_en_asym_s[i])
+    
+    sysAsym = asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, 
+                            CYdr, CYda, CL, Clda, Clb, Clp, Clr, Cldr, Cnda, 
+                            Cnb, Cnbdot, Cnp, Cnr, Cndr)
+    
+    if name_asym_eigenm[i] == "Spiral":
+        X0 = np.array([[0], [10], [0], [0]])
+        
+    else:
+        X0 = 0
+    
+    if name_asym_eigenm[i] == "Aperiodic Roll":
+        # default is step on input 1, in our case the aileron:
+        [y_asym,t_asym] = step(sysAsym, T)
+        
+    else:
+        [y_asym,t_asym,x_sym] = lsim(sysAsym, inp_asym[i], T, X0)
+    
+    fig2, ax2 = plt.subplots(2, 2)
+    fig2.suptitle("Asymmetric: " + name_asym_eigenm[i])
+    
+    #ax2[0,0].plot(tlistb-tlistb[0], delistb, label="test data")
+    ax2[0,0].plot(tlistb-tlistb[0], y_asym[:,0], label=r"$\beta$", color="orange")
+    ax2[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\beta$ [°]", title="sideslip angle")
+    ax2[0,0].legend()
+    
+    ax2[0,1].plot(tlisth-tlisth[0], delisth, label="test data")
+    ax2[0,1].plot(tlisth-tlisth[0], y_asym[:,1], label=r"$\phi$")
+    ax2[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\phi$ [°]", title="roll angle")
+    ax2[0,1].legend()
+    
+    ax2[1,0].plot(tlistp-tlistp[0], delistp, label="test data")
+    ax2[1,0].plot(tlistp-tlistp[0], y_asym[:,2], label="p")
+    ax2[1,0].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="yaw rate")
+    ax2[1,0].legend()
+    
+    ax2[1,1].plot(tlistr-tlistr[0], delistr, label="test data")
+    ax2[1,1].plot(tlistr-tlistr[0], y_asym[:,3], label="r")
+    ax2[1,1].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="roll rate")
+    ax2[1,1].legend()
+    
+    plt.legend()
 
 plt.show()
 
