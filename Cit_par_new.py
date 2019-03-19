@@ -212,8 +212,10 @@ hp0    = hp[0]              # pressure altitude in the stationary flight conditi
 V0     = VTAS[0]            # true airspeed in the stationary flight condition [m/sec]
 #alpha0 = np.deg2rad(5.6)
 #th0    = np.deg2rad(8.83)
-alpha0 = np.deg2rad(aoa[0]) # angle of attack in the stationary flight condition [rad]
-th0    = np.deg2rad(data["Ahrs1_Pitch"][stat1_ind][0]) # pitch angle in the stationary flight condition [rad]
+alpha0 =np.deg2rad(5.3)               # angle of attack in the stationary flight condition [rad]
+th0    =np.deg2rad(4.8)
+#alpha0 = np.deg2rad(aoa[0]) # angle of attack in the stationary flight condition [rad]
+#th0    = np.deg2rad(data["Ahrs1_Pitch"][stat1_ind][0]) # pitch angle in the stationary flight condition [rad]
 
 # Aircraft mass
 m      = m[0]        # mass [kg]
