@@ -2,8 +2,6 @@ import numpy as np
 
 import matplotlib.pyplot as plt
 
-import read_mat_data
-
 import subprocess
 
 
@@ -12,17 +10,6 @@ import subprocess
 # full path (and name)
 path_to_thrust_file = "thrust(1).exe"
 
-# reading reference data file (takes a while)
-data, unit, description, keys = read_mat_data.read_mat('reference_data.mat')
-
-print("Determining stability coefficients ...")
-
-
-## Begin Stationary Measurements 1 ---
-# timing
-tb_statf1  = 1157 # sec
-te_statf1  = 1920 # sec
-timestamps = np.array([1157, 1297, 1426, 1564, 1787, 1920]) # sec, timestamps in excel file
 
 
 # begin pre-specified values --------------------------------------------------
@@ -49,35 +36,9 @@ Ah     = bh ** 2 / Sh     # stabilser aspect ratio [ ]
 Vh_V   = 1	              # [ ]
 ih     = -2 * np.pi / 180 # stabiliser angle of incidence [rad]
 # end pre-specified values ----------------------------------------------------
-p0     = 101325           # sea-level pressure [Pa]  
+p0        = 101325           # sea-level pressure [Pa]  
+ramp_mass = 6689.22            # kg
 
-
-# collecting reference data
-time      = data["time"]
-stat1_ind = np.where(np.logical_and(time>=tb_statf1, time <= te_statf1)) # index
-t_stat1   = time[stat1_ind]
-aoa       = data["vane_AOA"][stat1_ind]                # deg
-hp        = data["Dadc1_alt"][stat1_ind] * 0.3048      # m
-Vc        = data["Dadc1_cas"][stat1_ind] * 0.5144444   # m/s
-Tm        = data["Dadc1_tat"][stat1_ind] + 273.15      # K
-le_FU     = data["lh_engine_FU"][stat1_ind] * 0.453592 # kg
-re_FU     = data["rh_engine_FU"][stat1_ind] * 0.453592 # kg
-delta_e   = data["elevator_dte"][stat1_ind]            # deg
-
-# 6 points only (they correspond to the values for static measurement 1 in the 
-# reference Excel file)
-index_6 = []
-for i in range(6):
-    index_6.append(np.where(t_stat1 == timestamps[i])[0][0])
-index_6 = np.array(index_6)
-
-aoa       = aoa[index_6]     # deg
-hp        = hp[index_6]      # m
-Vc        = Vc[index_6]      # m/s
-Tm        = Tm[index_6]      # K
-le_FU     = le_FU[index_6]   # kg
-re_FU     = re_FU[index_6]   # kg
-delta_e   = delta_e[index_6] # deg
 
 
 def flight_variables(hp, Vc, Tm):
@@ -99,107 +60,164 @@ def flight_variables(hp, Vc, Tm):
     
     return p, M, T, a, VTAS, rho, VEAS
 
-p, M, T, a, VTAS, rho, VEAS = flight_variables(hp, Vc, Tm)
-
-# ramp mass, total fuel used, mass, weight
-ramp_mass = 6689.22            # kg
-tot_FU    = le_FU + re_FU
-m         = ramp_mass - tot_FU
-W         = m*g
-
-# CL
-CL = 2*W/(rho*S*VTAS*VTAS)
 
 
-
-# prepare for thrust calculations
-real_alt = data["Dadc1_bcAlt"][stat1_ind][index_6] * 0.3048        # m
-T_ISA    = Temp0 + Tgrad*(real_alt)                                # K
-delta_T  = T - T_ISA                                               # -
-
-le_ff    = data["lh_engine_FMF"][stat1_ind][index_6] * 0.000125998 # kg/s
-re_ff    = data["rh_engine_FMF"][stat1_ind][index_6] * 0.000125998 # kg/s
-
-thrust_calc_in_file = open("matlab.dat", "w")
-
-for i in range(len(timestamps)):
-    thrust_calc_in_file.write("{} {} {} {} {}\n".format(float(hp[i]), float(M[i]), float(delta_T[i]), float(le_ff[i]), float(re_ff[i])))
-
-thrust_calc_in_file.close()
-
-# call thrust.exe to calculate the thrust
-subprocess.call([path_to_thrust_file])
-
-# process calculated thrust
-thrust_le = []
-thrust_re = []
-
-with open("thrust.dat") as f:
-    all_lines = f.readlines()
-f.close()
-
-for line in all_lines:
-    thrust_le.append(float(line.strip().split()[0]))
-    thrust_re.append(float(line.strip().split()[1]))
-
-thrust_le = np.array(thrust_le)
-thrust_re = np.array(thrust_re)
-
-thrust_imp = thrust_le + thrust_re
-
-# CD
-CD = 2*thrust_imp/(rho*S*VTAS*VTAS)
-
-
-
-# Results
-CLadeg, CLa0deg = np.polyfit(aoa, CL, 1) # lift curve gradient and CL at alpha = 0 per deg
-CLarad, CLa0rad = np.polyfit(np.deg2rad(aoa), CL, 1) # lift curve gradient and CL at alpha = 0 per rad
-a2, CD0 = np.polyfit(CL**2, CD, 1)
-e = (CL**2)/(CD-CD0)/(np.pi*A)
-
-if __name__ == "__main__":
-    # only plot graphs and print values when directly running this file to 
-    # avoid confusion of plots and prints in main file(s)
+def stat_meas_1():
     
-    fig, ax = plt.subplots()
-    ax.plot(aoa, CL, marker="+", markersize=5, linestyle="none", label="reference data")
-    ax.set(xlabel=r"$\alpha$ [°]", ylabel=r"$C_L$")
+    print("Using stationary measurements 1 ...")
     
-    ax.plot(aoa, CLadeg*aoa+CLa0deg, label="least square fit")
-    plt.legend()
-    
-    print("\nI think that CLa per deg = {}".format(CLadeg))
-    print("I think that CLa per rad = {}".format(CLarad))
-    
-    fig, ax = plt.subplots()
-    ax.plot(aoa, CD, marker="+", markersize=5, linestyle="none", label="reference data")
-    ax.set(xlabel=r"$\alpha$ [°]", ylabel=r"$C_D$")
-    
-    aa, bb, cc = np.polyfit(aoa, CD, 2)
-    ax.plot(aoa, aa*aoa**2 + bb*aoa + cc, label="degree 2 polynomial fit")
-    plt.legend()
-    
-    # CL vs CD
-    fig, ax = plt.subplots()
-    ax.plot(CL, CD, marker="+", markersize=5, linestyle="none", label="reference data")
-    ax.set(xlabel=r"$C_L$", ylabel=r"$C_D$")
-    plt.legend()
-    
-    # CL^2 vs CD (should be straight line)
-    fig, ax = plt.subplots()
-    ax.plot(CL**2, CD, marker="+", markersize=5, linestyle="none", label="reference data")
-    ax.set(xlabel=r"$C_L^2$", ylabel=r"$C_D$")
+# =============================================================================
+#     # timing
+#     tb_statf1  = 1157 # sec
+#     te_statf1  = 1920 # sec
+#     timestamps = np.array([1157, 1297, 1426, 1564, 1787, 1920]) # sec, timestamps in excel file
+#     
+#     # collecting reference data
+#     time      = data["time"]
+#     stat1_ind = np.where(np.logical_and(time>=tb_statf1, time <= te_statf1)) # index
+#     t_stat1   = time[stat1_ind]
+#     aoa       = data["vane_AOA"][stat1_ind]                # deg
+#     hp        = data["Dadc1_alt"][stat1_ind] * 0.3048      # m
+#     Vc        = data["Dadc1_cas"][stat1_ind] * 0.5144444   # m/s
+#     Tm        = data["Dadc1_tat"][stat1_ind] + 273.15      # K
+#     le_FU     = data["lh_engine_FU"][stat1_ind] * 0.453592 # kg
+#     re_FU     = data["rh_engine_FU"][stat1_ind] * 0.453592 # kg
+#     
+#     # 6 points only (they correspond to the values for static measurement 1 in the 
+#     # reference Excel file)
+#     index_6 = []
+#     for i in range(6):
+#         index_6.append(np.where(t_stat1 == timestamps[i])[0][0])
+#     index_6 = np.array(index_6)
+#     
+#     aoa       = aoa[index_6]     # deg
+#     hp        = hp[index_6]      # m
+#     Vc        = Vc[index_6]      # m/s
+#     Tm        = Tm[index_6]      # K
+#     le_FU     = le_FU[index_6]   # kg
+#     re_FU     = re_FU[index_6]   # kg
+# =============================================================================
     
     
-    ax.plot(CL**2, a2*(CL**2) + CD0, label="degree 1 polynomial fit")
-    plt.legend()
+    # Data from Excel file
+    aoa       = np.array([1.7, 2.4, 3.6, 5.4, 8.7, 10.6])               # deg
+    hp        = np.array([5010, 5020, 5020, 5030, 5020, 5110]) * 0.3048 # m
+    Vc        = np.array([249, 221, 192, 163, 130, 118]) * 0.5144444    # m/s
+    Tm        = np.array([12.5, 10.5, 8.8, 7.2, 6, 5.2]) + 273.15       # K
+    le_ff     = np.array([798, 673, 561, 463, 443, 474]) * 0.000125998  # kg/s
+    re_ff     = np.array([813, 682, 579, 484, 467, 499]) * 0.000125998  # kg/s
+    tot_FU    = np.array([360, 412, 447, 478, 532, 570]) * 0.453592     # kg
     
-    print("I think that CD0 = {}".format(CD0))
-    print("I think that e = {}".format(e[-2]))
     
-    plt.show()
-## End Stationary Measurements 1 ---
+    p, M, T, a, VTAS, rho, VEAS = flight_variables(hp, Vc, Tm)
+    
+    # ramp mass, total fuel used, mass, weight
+    #tot_FU    = le_FU + re_FU
+    m         = ramp_mass - tot_FU
+    W         = m*g
+    
+    # CL
+    CL = 2*W/(rho*S*VTAS*VTAS)
+    
+    
+    # prepare for thrust calculations
+    #real_alt = data["Dadc1_bcAlt"][stat1_ind][index_6] * 0.3048        # m
+    #T_ISA    = Temp0 + Tgrad*(real_alt)                                # K
+    T_ISA    = Temp0 + Tgrad*(hp)                                # K
+    delta_T  = T - T_ISA                                               # -
+    print(T_ISA, delta_T)
+    
+# =============================================================================
+#     le_ff    = data["lh_engine_FMF"][stat1_ind][index_6] * 0.000125998 # kg/s
+#     re_ff    = data["rh_engine_FMF"][stat1_ind][index_6] * 0.000125998 # kg/s
+# =============================================================================
+    
+    thrust_calc_in_file = open("matlab.dat", "w")
+    
+    print(hp)
+    print(M)
+    print(delta_T)
+    print(le_ff)
+    print(re_ff)
+    
+    for i in range(len(delta_T)):
+        thrust_calc_in_file.write("{} {} {} {} {}\n".format(float(hp[i]), float(M[i]), float(delta_T[i]), float(le_ff[i]), float(re_ff[i])))
+    
+    thrust_calc_in_file.close()
+    
+    # call thrust.exe to calculate the thrust
+    subprocess.call([path_to_thrust_file])
+    
+    # process calculated thrust
+    thrust_le = []
+    thrust_re = []
+    
+    with open("thrust.dat") as f:
+        all_lines = f.readlines()
+    f.close()
+    
+    for line in all_lines:
+        thrust_le.append(float(line.strip().split()[0]))
+        thrust_re.append(float(line.strip().split()[1]))
+    
+    thrust_le = np.array(thrust_le)
+    thrust_re = np.array(thrust_re)
+    
+    thrust_imp = thrust_le + thrust_re
+    
+    # CD
+    CD = 2*thrust_imp/(rho*S*VTAS*VTAS)
+    
+    
+    # Results
+    CLadeg, CLa0deg = np.polyfit(aoa, CL, 1) # lift curve gradient and CL at alpha = 0 per deg
+    CLarad, CLa0rad = np.polyfit(np.deg2rad(aoa), CL, 1) # lift curve gradient and CL at alpha = 0 per rad
+    a2, CD0 = np.polyfit(CL**2, CD, 1)
+    e = (sum(CL**2)/len(CL**2))/(((sum(CD)/len(CD))-CD0)*(np.pi*A)) # use avg CL and CD
+    
+    if __name__ == "__main__":
+        # only plot graphs and print values when directly running this file to 
+        # avoid confusion of plots and prints in main file(s)
+        
+        fig, ax = plt.subplots()
+        ax.plot(aoa, CL, marker="+", markersize=5, linestyle="none", label="reference data")
+        ax.set(xlabel=r"$\alpha$ [°]", ylabel=r"$C_L$")
+        
+        ax.plot(aoa, CLadeg*aoa+CLa0deg, label="least square fit")
+        plt.legend()
+        
+        print("\nI think that CLa per deg = {}".format(CLadeg))
+        print("I think that CLa per rad = {}".format(CLarad))
+        
+        fig, ax = plt.subplots()
+        ax.plot(aoa, CD, marker="+", markersize=5, linestyle="none", label="reference data")
+        ax.set(xlabel=r"$\alpha$ [°]", ylabel=r"$C_D$")
+        
+        aa, bb, cc = np.polyfit(aoa, CD, 2)
+        ax.plot(aoa, aa*aoa**2 + bb*aoa + cc, label="degree 2 polynomial fit")
+        plt.legend()
+        
+        # CL vs CD
+        fig, ax = plt.subplots()
+        ax.plot(CL, CD, marker="+", markersize=5, linestyle="none", label="reference data")
+        ax.set(xlabel=r"$C_L$", ylabel=r"$C_D$")
+        plt.legend()
+        
+        # CL^2 vs CD (should be straight line)
+        fig, ax = plt.subplots()
+        ax.plot(CL**2, CD, marker="+", markersize=5, linestyle="none", label="reference data")
+        ax.set(xlabel=r"$C_L^2$", ylabel=r"$C_D$")
+        
+        
+        ax.plot(CL**2, a2*(CL**2) + CD0, label="degree 1 polynomial fit")
+        plt.legend()
+        
+        print("I think that CD0 = {}".format(CD0))
+        print("I think that e = {}".format(e))
+        
+        plt.show()
+    
+    return CLarad, CD0, e
 
 
 
@@ -208,6 +226,9 @@ if __name__ == "__main__":
 # xcg = 0.25 * c
 
 def stat_meas_2():
+    
+    print("Using stationary measurements 2 ...")
+    
     # these values come from the Excel reference sheet thing from the cg-shift part
     de_cgsh        = np.array([0, -0.5])              # deg  
     dde            = de_cgsh[-1] - de_cgsh[0]         # deg
@@ -231,15 +252,29 @@ def stat_meas_2():
     dde_rad   = np.deg2rad(dde)
     Cmde      = -(1/dde_rad)*CN*(dxcg/c)        # elevator effectiveness [ ]
     
-    dde_alpha = (1 - 0)/(3.4 - 5.3)             # from ELEVATOR TRIM CURVE!
-    Cma       = -Cmde*dde_alpha                 # longitudinal stabilty [ ]
+    # elevator trim curve
+    alpha_et  = np.array([5.3, 6.3, 7.3, 8.5, 4.5, 4.1, 3.4])
+    de_et     = np.array([0, -0.4, -0.9, -1.5, 0.4, 0.6, 1])
+    
+    dde_alpha, intersect = np.polyfit(alpha_et, de_et, 1)
+    
+    Cma       = -Cmde*dde_alpha
+    
+    if __name__ == "__main__":
+        fig, ax = plt.subplots(1, 1)
+        ax.plot(alpha_et, de_et, marker="o", linestyle="None", label="Data")
+        ax.plot(alpha_et, dde_alpha*alpha_et + intersect, label="Linear Fit")
+        #ax.plot(alpha_et, dde_alpha2*alpha_et + intersect2, label="Numpy Polyfit")
+        ax.set(xlabel=r"$\alpha$ [°]", ylabel=r"$\delta_e$ [°]", title="Elevator-Trim Curve")
+        ax.legend()
+        plt.show()
     
     return Cmde, Cma
 
 
-def stab_coef(tstart, tend):
-    global e, CDO, CLarad
-    ## Begin Initial Conditions ---
+def stab_coef(tstart, tend, CLarad, CD0, e, data):
+    
+    print("Determining stability coefficients ...")
     
     # collecting data
     time  = data["time"]
@@ -262,7 +297,6 @@ def stab_coef(tstart, tend):
     m      = m[0]        # mass [kg]
     
     # aerodynamic properties
-    ef     = e[-2]       # Oswald factor [ ]
     CD0f   = CD0         # Zero lift drag coefficient [ ]
     CLaf   = CLarad      # Slope of CL-alpha curve [ ]
     ## End Initial Conditions ---
@@ -336,7 +370,7 @@ def stab_coef(tstart, tend):
     Cndr   =  -0.0939
     # end pre-specified values ----------------------------------------------------
     
-    return (hp0, V0, alpha0, th0, m, ef, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
+    return (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
             KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, 
             CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb, 
             CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, 

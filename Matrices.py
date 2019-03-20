@@ -11,8 +11,6 @@ import numpy as np
 
 import grafiekjesmakenyay
 
-#from Cit_par_appC import *
-
 import Cit_par_new
 
 import read_mat_data
@@ -22,17 +20,20 @@ data, unit, description, keys = read_mat_data.read_mat("reference_data.mat")
 
 
 # collect parameters derived from stationary measurements
+CLarad, CD0, e = Cit_par_new.stat_meas_1()
 Cmde, Cma = Cit_par_new.stat_meas_2()
 
-print("Assemblying system matrices ...")
 
 def sysmat(C1,C2,C3):
     A = -np.linalg.inv(C1)*C2
     B = -np.linalg.inv(C1)*C3
     return A,B
 
+
 def sym_matrices(c, muc, V0, KY2, CX0, CXa, CXde, CXu, CXq, CZ0, CZa, CZadot, 
                  CZde, CZu, CZq, Cmadot, Cmu, Cmq):
+    
+    print("Assemblying symmetric system matrices ...")
     
     C1_sym=np.matrix([[-2*muc*c/(V0**2), 0, 0, 0],
                      [0, (CZadot-2*muc)*c/V0, 0, 0],
@@ -57,12 +58,14 @@ def sym_matrices(c, muc, V0, KY2, CX0, CXa, CXde, CXu, CXq, CZ0, CZa, CZadot,
     C_sym=np.identity(4)
     D_sym=np.zeros((4,1))
     
-    return ss(A_sym, B_sym, C_sym, D_sym)
+    return ss(A_sym, B_sym, C_sym, D_sym), A_sym
 
 
 def asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, CYdr, CYda,
                   CL, Clda, Clb, Clp, Clr, Cldr, Cnda, Cnb, Cnbdot, Cnp, Cnr, 
                   Cndr):
+    
+    print("Assemblying asymmetric system matrices ...")
     
     C1_asym = np.matrix([[(CYbdot-2*mub)*(b/V0),0,0,0],
                  [0,-.5*b/V0,0,0],
@@ -90,13 +93,7 @@ def asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, CYdr, CYda,
     C_asym=np.identity(4)
     D_asym=np.zeros((4,2))
     
-    return ss(A_asym,B_asym,C_asym,D_asym)
-
-
-#sym_eig = np.linalg.eig(A_sym)[0]
-#asym_eig = np.linalg.eig(A_asym)[0]
-#print("\nSymmetric eigenvalues: \nshort period = {}\nphugoid = {}".format(sym_eig[0], sym_eig[2]))
-#print("\nAsymmetric eigenvalues: \nHighly damped aperiodic rolling = {}\nDutch roll = {}\nAperiodic spiral motion = {}\n".format(asym_eig[0], asym_eig[1], asym_eig[3]))
+    return ss(A_asym,B_asym,C_asym,D_asym), A_asym
 
 
 
@@ -107,28 +104,36 @@ def asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, CYdr, CYda,
 # Dutch Roll Yaw Damping: 62:47 - 65:20
 # Spiral: 65:20 - ...
 
-name_sym_eigenm = ["Phugoid", "Short Period"]
+name_sym_eigenm = ["Short Period", "Phugoid"]
 
-T_st_sym = [(53, 40), (60,25)]
-T_en_sym = [(57, 30), (60,31)]
+T_st_sym = [(60,25), (53, 40)]
+T_en_sym = [(60,31), (57, 30)]
 
 T_st_sym_s = [T_st_sym[0][0]*60 + T_st_sym[0][1], T_st_sym[1][0]*60 + T_st_sym[1][1]]
 T_en_sym_s = [T_en_sym[0][0]*60 + T_en_sym[0][1], T_en_sym[1][0]*60 + T_en_sym[1][1]]
 
-inp_sym = [-0.3259, -1.74]
+inp_sym = [-1.74, -0.3259]
 
 for i in range(len(name_sym_eigenm)):
+    
+    print("\nSimulating "+name_sym_eigenm[i]+" ...")
+    
     T = np.arange(0, T_en_sym[i][0]*60 + T_en_sym[i][1] - T_st_sym[i][0]*60 - T_st_sym[i][1] + 0.1, 0.1)
     
-    (hp0, V0, alpha0, th0, m, ef, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
+    (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
      KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, 
      CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb, 
      CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, 
      Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b) = Cit_par_new.stab_coef(T_st_sym_s[i], 
-                                                                 T_en_sym_s[i])
+                                                                 T_en_sym_s[i], 
+                                                                 CLarad, CD0, e,
+                                                                 data)
     
-    sysSym = sym_matrices(c, muc, V0, KY2, CX0, CXa, CXde, CXu, CXq, CZ0, CZa, 
-                          CZadot, CZde, CZu, CZq, Cmadot, Cmu, Cmq)
+    sysSym, A = sym_matrices(c, muc, V0, KY2, CX0, CXa, CXde, CXu, CXq, CZ0, 
+                             CZa, CZadot, CZde, CZu, CZq, Cmadot, Cmu, Cmq)
+    
+    eig = np.linalg.eig(A)[0]
+    print("Eigenvalue = {}".format(eig[2*i]))
     
     [y_sym,t_sym,x_sym] = lsim(sysSym, inp_sym[i], T)
     
@@ -170,7 +175,7 @@ for i in range(len(name_sym_eigenm)):
 
 name_asym_eigenm = ["Aperiodic Roll", "Dutch Roll", "Spiral"]
 
-T_st_asym = [(59,10), (61,57), (65,22)]
+T_st_asym = [(59,10), (61,50), (65,22)]
 T_en_asym = [(59,30), (62,35), (65,50)]
 
 T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
@@ -178,11 +183,15 @@ T_en_asym_s = [T_en_asym[0][0]*60 + T_en_asym[0][1], T_en_asym[1][0]*60 + T_en_a
 
 nr_points_aroll = (T_en_asym[0][0]*60+T_en_asym[0][1] - (T_st_asym[0][0]*60+T_st_asym[0][1]))*10 + 1
 input_aroll = np.vstack((np.ones(nr_points_aroll)*3, np.zeros(nr_points_aroll)))
-dummy, input_dutchroll = grafiekjesmakenyay.plot_real_data(T_st_asym[1], T_en_asym[1], "delta_r", data)
-inp_asym = [input_aroll.T, np.vstack((np.zeros(len(input_dutchroll)), input_dutchroll)).T, 0.0]
+nr_points_dutchroll = (T_en_asym[1][0]*60+T_en_asym[1][1] - (T_st_asym[1][0]*60+T_st_asym[1][1]))*10 + 1
+input_dutchroll = np.vstack((np.zeros(nr_points_dutchroll), np.hstack((np.array([-45, 45, -45]), np.zeros(nr_points_dutchroll - 3))))).T
+inp_asym = [input_aroll.T, input_dutchroll, 0.0]
 
 
 for i in range(len(name_asym_eigenm)):
+    
+    print("\nSimulating "+name_asym_eigenm[i]+" ...")
+    
     tlistb, delistb = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Fms1_trueHeading", data)
     tlisth, delisth = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_Roll", data)
     tlistp, delistp = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_bYawRate", data)
@@ -190,21 +199,28 @@ for i in range(len(name_asym_eigenm)):
     
     T = np.arange(0, T_en_asym[i][0]*60 + T_en_asym[i][1] - T_st_asym[i][0]*60 - T_st_asym[i][1] + 0.1, 0.1)
     
-    (hp0, V0, alpha0, th0, m, ef, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
+    (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
      KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, 
      CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb, 
      CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, 
      Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b) = Cit_par_new.stab_coef(T_st_asym_s[i], 
-                                                                 T_en_asym_s[i])
+                                                                 T_en_asym_s[i],
+                                                                 CLarad, CD0, e,
+                                                                 data)
     
-    sysAsym = asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, 
-                            CYdr, CYda, CL, Clda, Clb, Clp, Clr, Cldr, Cnda, 
-                            Cnb, Cnbdot, Cnp, Cnr, Cndr)
+    sysAsym, A = asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, 
+                               CYr, CYdr, CYda, CL, Clda, Clb, Clp, Clr, Cldr, 
+                               Cnda, Cnb, Cnbdot, Cnp, Cnr, Cndr)
+    
+    eig = np.linalg.eig(A)[0]
+    
     
     if name_asym_eigenm[i] == "Spiral":
+        print("Eigenvalue = {}".format(eig[-1]))
         X0 = np.array([[0], [10], [0], [0]])
         
     else:
+        print("Eigenvalue = {}".format(eig[i]))
         X0 = 0
     
     if name_asym_eigenm[i] == "Aperiodic Roll":
