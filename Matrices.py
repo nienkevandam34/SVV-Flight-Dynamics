@@ -97,13 +97,6 @@ def asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, CYdr, CYda,
 
 
 
-# Phugoid: 53:57 - 59:10
-# Aperiodic Roll: 59:10 - 60:35
-# Short Period: 60:35 - 61:57
-# Dutch Roll: 61:57 - 62:47
-# Dutch Roll Yaw Damping: 62:47 - 65:20
-# Spiral: 65:20 - ...
-
 name_sym_eigenm = ["Short Period", "Phugoid"]
 
 T_st_sym = [(60,25), (53, 40)]
