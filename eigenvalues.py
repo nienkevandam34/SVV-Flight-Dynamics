@@ -11,8 +11,8 @@ def findeigenvalues(CLarad, CD0, e, data, motion):
     Cmde,Cma= Cit_par_new.stat_meas_2(show_plots=False)
     
     if motion=="Phugoid":
-        tstart=60*60+25
-        tend=60*60+31
+        tstart=61*60+35
+        tend=62*60+20
         (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb,  CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b)=Cit_par_new.stab_coef(tstart, tend, CLarad, CD0, e, data)
         
         # qdot = 0, a = 0
@@ -29,8 +29,8 @@ def findeigenvalues(CLarad, CD0, e, data, motion):
         lambda_ = [np.roots(coeff_3)*V0/c, np.roots(coeff_4)*V0/c]
         
     elif motion=="Short Period":
-        tstart=53*60+40
-        tend=57*60+30
+        tstart=58*60+56
+        tend=61*60+4
         (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb,  CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b)=Cit_par_new.stab_coef(tstart, tend, CLarad, CD0, e, data)
         
         # A*labda^2 + B*labda + C = 0
@@ -55,15 +55,15 @@ def findeigenvalues(CLarad, CD0, e, data, motion):
         lambda_ = [np.roots(coeff_1a)*V0/c, np.roots(coeff_1)*V0/c, np.roots(coeff_2)*V0/c]
         
     elif motion=="Highly Damped Aperiodic Roll":
-        tstart=59*60+10
-        tend=59*60+30
+        tstart=65*60+4
+        tend=68*60+0
         (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb,  CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b)=Cit_par_new.stab_coef(tstart, tend, CLarad, CD0, e, data)
         
         lambda_ = Clp/(4*mub*KX2)*V0/b
         
     elif motion=="Dutch Roll":
-        tstart=61*60+50
-        tend=62*60+35
+        tstart=63*60+3
+        tend=63*60+23
         (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb,  CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b)=Cit_par_new.stab_coef(tstart, tend, CLarad, CD0, e, data)
         
         # pb/2V = 0
@@ -80,8 +80,8 @@ def findeigenvalues(CLarad, CD0, e, data, motion):
         lambda_ = [np.roots(coeff_6)*V0/b, np.roots(coeff_7)*V0/b]
         
     elif motion=="Aperiodic Spiral":
-        tstart=65*60+22
-        tend=65*60+50
+        tstart=68*60+50
+        tend=70*60+50
         
         (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb,  CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b)=Cit_par_new.stab_coef(tstart, tend, CLarad, CD0, e, data)
         
