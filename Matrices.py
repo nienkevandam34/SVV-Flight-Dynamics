@@ -8,6 +8,7 @@ from control import ss
 from control.matlab import step, impulse, initial, lsim
 import matplotlib.pyplot as plt
 import numpy as np
+import eigenvalues 
 
 import grafiekjesmakenyay
 
@@ -23,6 +24,7 @@ data, unit, description, keys = read_mat_data.read_mat("reference_data.mat")
 CLarad, CD0, e = Cit_par_new.stat_meas_1()
 Cmde, Cma = Cit_par_new.stat_meas_2()
 
+lambda_ = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Phugoid")
 
 def sysmat(C1,C2,C3):
     A = -np.linalg.inv(C1)*C2
