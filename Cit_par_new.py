@@ -309,7 +309,7 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
     d_e_eq_meas = 0.5
     
     de_et_red   = d_e_eq_meas - 1/Cmde * Cmtc * (TCs-TC)
-    print(Cmtc, TCs, TC)
+    
     
     if show_plots:
         print("Cmde = {}".format(Cmde))

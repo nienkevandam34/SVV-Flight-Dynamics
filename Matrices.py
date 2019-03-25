@@ -38,7 +38,14 @@ data, unit, description, keys = read_mat_data.read_mat(data_name)
 CLarad, CD0, e = Cit_par_new.stat_meas_1(use_reference_data, False)
 Cmde, Cma = Cit_par_new.stat_meas_2(use_reference_data, False)
 
-lambda_ = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Phugoid")
+lambda_short = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Short Period")
+lambda_phug = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Phugoid")
+lambda_roll = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Highly Damped Aperiodic Roll")
+lambda_dutch = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Dutch Roll")
+lambda_spiral = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Aperiodic Spiral")
+
+lambda_list_sym  = [lambda_short, lambda_phug]
+lambda_list_asym = [lambda_roll, lambda_dutch, lambda_spiral]
 
 def sysmat(C1,C2,C3):
     A = -np.linalg.inv(C1)*C2
@@ -158,6 +165,7 @@ for i in range(len(name_sym_eigenm)):
     # determine eigenvalues
     eig = np.linalg.eig(A)[0]
     print("Eigenvalue = {}".format(eig[2*i]))
+    print("Analytical eigenvalue = {}".format(lambda_list_sym[i]))
     
     # simulate system response
     [y_sym,t_sym,x_sym] = lsim(sysSym, elevator_input, T)#lsim(sysSym, inp_sym[i], T)
@@ -261,6 +269,8 @@ for i in range(len(name_asym_eigenm)):
     else:
         print("Eigenvalue = {}".format(eig[i]))
         X0 = 0
+    
+    print("Analytical eigenvalue = {}".format(lambda_list_asym[i]))
     
     if name_asym_eigenm[i] == "Aperiodic Roll":
         # default is step on input 1, in our case the aileron:
