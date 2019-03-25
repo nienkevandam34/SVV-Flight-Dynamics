@@ -315,20 +315,38 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
         print("Cmde = {}".format(Cmde))
         print("Cma = {}".format(Cma))
         
-        fig, ax = plt.subplots(1, 4)
-        ax[0].plot(alpha_et, de_et, marker="o", linestyle="None", label="Data")
-        ax[0].plot(alpha_et, dde_alpha*alpha_et + intersect, label="Linear Fit")
-        ax[0].set(xlabel=r"$\alpha$ [°]", ylabel=r"$\delta_e$ [°]", title="Elevator-Trim Curve")
-        ax[0].legend()
+        fig, ax = plt.subplots(2, 2)
         
-        ax[1].plot(Vc_et, de_et, marker="o", linestyle="None")
-        ax[1].set(xlabel=r"$V_c$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Elevator-Trim Curve")
+        fig.suptitle("Elevator trim curves")
         
-        ax[2].plot(V_et_red, de_et, marker="o", linestyle="None")
-        ax[2].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Elevator-Trim Curve")
+        ax[0,0].plot(alpha_et, de_et, marker="o", linestyle="None", label="Data")
+        ax[0,0].plot(alpha_et, dde_alpha*alpha_et + intersect, label="Linear Fit")
+        ax[0,0].set(xlabel=r"$\alpha$ [°]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs real angle of attack")
+        ax[0,0].legend()
         
-        ax[3].plot(V_et_red, de_et_red, marker="o", linestyle="None")
-        ax[3].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\tilde{\delta}_e$ [°]", title="Reduced Elevator-Trim Curve")
+        ax[0,1].plot(Vc_et, de_et, marker="o", linestyle="None")
+        ax[0,1].set(xlabel=r"$V_c$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs calibrated airspeed")
+        
+        ax[1,0].plot(V_et_red, de_et, marker="o", linestyle="None")
+        ax[1,0].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs reduced equivalent airspeed")
+        
+        ax[1,1].plot(V_et_red, de_et_red, marker="o", linestyle="None")
+        ax[1,1].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\tilde{\delta}_e$ [°]", title="Reduced Elevator-Trim Curve")
+        
+        
+        fig2, ax2 = plt.subplots(2, 2)
+        
+        fig2.suptitle("Stick force curves")
+        
+        ax2[0,0].plot(alpha_et, F_stick_et, marker="o", linestyle="None")
+        ax2[0,0].set(xlabel=r"$\alpha$ [°]", ylabel="F [N]", title="Real force vs real angle of attack")
+        
+        ax2[0,1].plot(Vc_et, F_stick_et, marker="o", linestyle="None")
+        ax2[0,1].set(xlabel=r"$V_c$ [m/s]", ylabel="F [N]", title="Real force vs calibrated airspeed")
+        
+        ax2[1,0].plot(V_et_red, F_stick_et, marker="o", linestyle="None")
+        ax2[1,0].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel="F [N]", title="Real force vs reduced equivalent airspeed")
+        
         
         plt.show()
     

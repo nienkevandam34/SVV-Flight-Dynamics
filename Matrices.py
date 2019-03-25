@@ -47,6 +47,8 @@ lambda_spiral = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Aperiodic Spi
 lambda_list_sym  = [lambda_short, lambda_phug]
 lambda_list_asym = [lambda_roll, lambda_dutch, lambda_spiral]
 
+
+
 def sysmat(C1,C2,C3):
     A = -np.linalg.inv(C1)*C2
     B = -np.linalg.inv(C1)*C3
@@ -217,13 +219,6 @@ else:
 
 T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
 T_en_asym_s = [T_en_asym[0][0]*60 + T_en_asym[0][1], T_en_asym[1][0]*60 + T_en_asym[1][1], T_en_asym[2][0]*60 + T_en_asym[2][1]]
-
-nr_points_aroll = (T_en_asym[0][0]*60+T_en_asym[0][1] - (T_st_asym[0][0]*60+T_st_asym[0][1]))*10 + 1
-input_aroll = np.vstack((np.ones(nr_points_aroll)*3, np.zeros(nr_points_aroll)))
-nr_points_dutchroll = (T_en_asym[1][0]*60+T_en_asym[1][1] - (T_st_asym[1][0]*60+T_st_asym[1][1]))*10 + 1
-input_dutchroll = np.vstack((np.zeros(nr_points_dutchroll), np.hstack((np.array([-45, 45, -45]), np.zeros(nr_points_dutchroll - 3))))).T
-inp_asym = [input_aroll.T, input_dutchroll, 0.0]
-
 
 for i in range(len(name_asym_eigenm)):
     
