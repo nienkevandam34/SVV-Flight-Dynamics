@@ -21,7 +21,7 @@ import Cit_par_new
 
 import read_mat_data
 
-use_reference_data = False
+use_reference_data = True
 
 if use_reference_data:
     data_name = "reference_data.mat"
@@ -287,14 +287,14 @@ for i in range(len(name_asym_eigenm)):
     ax2[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\phi$ [°]", title="roll angle")
     ax2[0,1].legend()
     
-    ax2[1,0].plot(tlistp-tlistp[0], delistp, label="test data")
-    ax2[1,0].plot(tlistp-tlistp[0], y_asym[:,2], label="p")
-    ax2[1,0].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="yaw rate")
+    ax2[1,0].plot(tlistp-tlistr[0], delistr, label="test data")
+    ax2[1,0].plot(tlistp-tlistr[0], y_asym[:,2], label="p")
+    ax2[1,0].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="yaw rate")
     ax2[1,0].legend()
     
-    ax2[1,1].plot(tlistr-tlistr[0], delistr, label="test data")
-    ax2[1,1].plot(tlistr-tlistr[0], y_asym[:,3], label="r")
-    ax2[1,1].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="roll rate")
+    ax2[1,1].plot(tlistr-tlistp[0], delistp, label="test data")
+    ax2[1,1].plot(tlistr-tlistp[0], y_asym[:,3], label="r")
+    ax2[1,1].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="roll rate")
     ax2[1,1].legend()
     
     plt.legend()
