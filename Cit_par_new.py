@@ -62,19 +62,31 @@ def flight_variables(hp, Vc, Tm):
 
 
 
-def stat_meas_1(show_plots=False):
+def stat_meas_1(use_reference_data=False, show_plots=False):
     
     print("Using stationary measurements 1 ...")
     
-    # Data from Excel file
-    aoa       = np.array([1.7, 2.4, 3.6, 5.4, 8.7, 10.6])               # deg
-    hp        = np.array([5010, 5020, 5020, 5030, 5020, 5110]) * 0.3048 # m
-    Vc        = np.array([249, 221, 192, 163, 130, 118]) * 0.5144444    # m/s
-    Tm        = np.array([12.5, 10.5, 8.8, 7.2, 6, 5.2]) + 273.15       # K
-    le_ff     = np.array([798, 673, 561, 463, 443, 474]) * 0.000125998  # kg/s
-    re_ff     = np.array([813, 682, 579, 484, 467, 499]) * 0.000125998  # kg/s
-    tot_FU    = np.array([360, 412, 447, 478, 532, 570]) * 0.453592     # kg
+    if use_reference_data:
+        # Data from REFERENCE_Post_Flight_Datasheet_Flight.xlsx Stationary 
+        # measurements CL-CD series 1
+        aoa       = np.array([1.7, 2.4, 3.6, 5.4, 8.7, 10.6])               # deg
+        hp        = np.array([5010, 5020, 5020, 5030, 5020, 5110]) * 0.3048 # m
+        Vc        = np.array([249, 221, 192, 163, 130, 118]) * 0.5144444    # m/s
+        Tm        = np.array([12.5, 10.5, 8.8, 7.2, 6, 5.2]) + 273.15       # K
+        le_ff     = np.array([798, 673, 561, 463, 443, 474]) * 0.000125998  # kg/s
+        re_ff     = np.array([813, 682, 579, 484, 467, 499]) * 0.000125998  # kg/s
+        tot_FU    = np.array([360, 412, 447, 478, 532, 570]) * 0.453592     # kg
     
+    else:
+        # Data from Post_Flight_Datasheet_18_03_V3.xlsx Stationary measurements 
+        # CL-CD series 1
+        aoa       = np.array([1.65, 2.433333333, 3.416666667, 5.5, 7.6, 10.65])                                   # deg
+        hp        = np.array([7998.333333, 9088.333333, 9070, 9080, 8951.666667, 9206.666667]) * 0.3048           # m
+        Vc        = np.array([242.8333333, 216.8333333, 190.8333333, 157.6666667, 138.3333333, 118]) * 0.5144444  # m/s
+        Tm        = np.array([-0.65, -5.25, -6.5, -8, -8.783333333, -10.16666667]) + 273.15                       # K
+        le_ff     = np.array([704, 593.3333333, 481.5, 441, 385.6666667, 423.6666667]) * 0.000125998              # kg/s
+        re_ff     = np.array([765, 651.8333333, 538.5, 493.1666667, 414.3333333, 458.3333333]) * 0.000125998      # kg/s
+        tot_FU    = np.array([375.5, 617.8333333, 640.1666667, 670.3333333, 704.8333333, 757.6666667]) * 0.453592 # kg
     
     p, M, T, a, VTAS, rho, VEAS = flight_variables(hp, Vc, Tm)
     
@@ -130,7 +142,7 @@ def stat_meas_1(show_plots=False):
     CLarad, CLa0rad = np.polyfit(np.deg2rad(aoa), CL, 1) # lift curve gradient and CL at alpha = 0 per rad
     a2, CD0 = np.polyfit(CL**2, CD, 1)
     e = (sum(CL**2)/len(CL**2))/(((sum(CD)/len(CD))-CD0)*(np.pi*A)) # use avg CL and CD
-    print(e)
+    
     if show_plots:        
         print("\nCLa per deg = {}".format(CLadeg))
         print("CLa per rad = {}".format(CLarad))
@@ -163,19 +175,56 @@ def stat_meas_1(show_plots=False):
 
 # xcg = 0.25 * c
 
-def stat_meas_2(show_plots=False):
+def stat_meas_2(use_reference_data=False, show_plots=False):
     
     print("Using stationary measurements 2 ...")
     
-    # these values come from the Excel reference sheet thing from the cg-shift part
-    de_cgsh     = np.array([0, -0.5])              # deg  
-    dde         = de_cgsh[-1] - de_cgsh[0]         # deg
-    alpha_cgsh  = np.array([5.3, 5.3])             # deg
-    hp_cgsh     = np.array([5730, 57909]) * 0.3048 # m
-    Vc_cgsh     = np.array([161, 161]) * 0.5144444 # m/s
-    Tm_cgsh     = np.array([5.0, 5.0]) + 273.15    # K
-    tot_FU_cgsh = np.array([881, 910]) * 0.453592  # kg
+    if use_reference_data:
+        # Data from REFERENCE_Post_Flight_Datasheet_Flight.xlsx 
+        # shift in centre of gravity
+        de_cgsh     = np.array([0, -0.5])              # deg  
+        dde         = de_cgsh[-1] - de_cgsh[0]         # deg
+        alpha_cgsh  = np.array([5.3, 5.3])             # deg
+        hp_cgsh     = np.array([5730, 57909]) * 0.3048 # m
+        Vc_cgsh     = np.array([161, 161]) * 0.5144444 # m/s
+        Tm_cgsh     = np.array([5.0, 5.0]) + 273.15    # K
+        tot_FU_cgsh = np.array([881, 910]) * 0.453592  # kg
+        
+        # stationary measurement Elevator Trim Curve
+        alpha_et   = np.array([5.3, 6.3, 7.3, 8.5, 4.5, 4.1, 3.4])                 # deg
+        de_et      = np.array([0, -0.4, -0.9, -1.5, 0.4, 0.6, 1])                  # deg
+        hp_et      = np.array([6060, 6350, 6550, 6880, 6160, 5810, 5310]) * 0.3048 # m
+        Vc_et      = np.array([161, 150, 140, 130, 173, 179, 192]) * 0.5144444     # m/s
+        Tm_et      = np.array([5.5, 4.5, 3.5, 2.5, 5.0, 6.2, 8.2]) + 273.15        # K
+        le_ff_et   = np.array([462, 458, 454, 449, 465, 472, 482]) * 0.000125998   # kg/s
+        re_ff_et   = np.array([486, 482, 477, 473, 489, 496, 505]) * 0.000125998   # kg/s
+        tot_FU_et  = np.array([664, 694, 730, 755, 798, 825, 846]) * 0.453592      # kg
+        F_stick_et = np.array([0, -23, -29, -46, 26, 40, 83])                      # N
     
+    else:
+        # Data from Post_Flight_Datasheet_18_03_V3.xlsx 
+        # shift in centre of gravity
+        de_cgsh     = np.array([0.2, -0.25])                           # deg  
+        dde         = de_cgsh[-1] - de_cgsh[0]                         # deg
+        alpha_cgsh  = np.array([5.05, 5.116666667])                    # deg
+        hp_cgsh     = np.array([11063.33333, 11043.33333]) * 0.3048    # m
+        Vc_cgsh     = np.array([161.1666667, 161.6666667]) * 0.5144444 # m/s
+        Tm_cgsh     = np.array([-12.35, -12.2]) + 273.15               # K
+        tot_FU_cgsh = np.array([1037, 1058.5]) * 0.453592              # kg
+        
+        # stationary measurement Elevator Trim Curve
+        alpha_et   = np.array([5.266666667, 6.333333333, 7.3, 8.616666667, 4.35, 3.733333333, 3.35])                          # deg
+        de_et      = np.array([0.3, -0.2, -0.6, -1.25, 0.6, 0.8, 1.1])                                                        # deg
+        hp_et      = np.array([12088.33333, 12306.66667, 12523.33333, 12808.33333, 11840, 11473.33333, 11033.33333]) * 0.3048 # m
+        Vc_et      = np.array([160.3333333, 148.8333333, 139, 130.5, 173, 180.5, 189.6666667]) * 0.5144444                    # m/s
+        Tm_et      = np.array([-14.2, -15.2, -16.2, -17.2, -13, -12, -10.5]) + 273.15                                         # K
+        le_ff_et   = np.array([402.5, 399, 396, 390, 408.5, 414, 420]) * 0.000125998                                          # kg/s
+        re_ff_et   = np.array([447.5, 444.5, 441.5, 435, 456, 462, 468]) * 0.000125998                                        # kg/s
+        tot_FU_et  = np.array([894.5, 909.5, 926.5, 945, 963.5, 978, 995]) * 0.453592                                         # kg
+        F_stick_et = np.array([1, -21.5, -30.5, -40.5, 29.5, 47.5, 65])                                                       # N
+    
+    
+    # cg-shift calculations for Cmde
     (p_cgsh, M_cgsh, T_cgsh, a_cgsh, 
      VTAS_cgsh, rho_cgsh, VEAS_cgsh) = flight_variables(hp_cgsh, Vc_cgsh, Tm_cgsh)
     
@@ -189,14 +238,7 @@ def stat_meas_2(show_plots=False):
     dde_rad   = np.deg2rad(dde)
     Cmde      = -(1/dde_rad)*CN*(dxcg/c)        # elevator effectiveness [ ]
     
-    # elevator trim curve data from Excel sheet
-    alpha_et  = np.array([5.3, 6.3, 7.3, 8.5, 4.5, 4.1, 3.4])                 # deg
-    de_et     = np.array([0, -0.4, -0.9, -1.5, 0.4, 0.6, 1])                  # deg
-    hp_et     = np.array([6060, 6350, 6550, 6880, 6160, 5810, 5310]) * 0.3048 # m
-    Vc_et     = np.array([161, 150, 140, 130, 173, 179, 192]) * 0.5144444     # m/s
-    Tm_et     = np.array([5.5, 4.5, 3.5, 2.5, 5.0, 6.2, 8.2]) + 273.15        # K
-    tot_FU_et = np.array([664, 694, 730, 755, 798, 825, 846]) * 0.453592      # kg
-    
+    # elevator trim curve calculations for Cma
     (p_et, M_et, T_et, a_et, 
      VTAS_et, rho_et, VEAS_et) = flight_variables(hp_et, Vc_et, Tm_et)
     
@@ -211,11 +253,69 @@ def stat_meas_2(show_plots=False):
     
     Cma       = -Cmde*dde_alpha
     
+    # determine real thrust coefficient
+    T_ISA_et    = Temp0 + Tgrad*(hp_et)                                       # K
+    delta_T_et  = T_et - T_ISA_et                                               # -
+    
+    thrust_calc_in_file = open("matlab.dat", "w")
+    for i in range(len(delta_T_et)):
+        thrust_calc_in_file.write("{} {} {} {} {}\n".format(float(hp_et[i]), float(M_et[i]), float(delta_T_et[i]), float(le_ff_et[i]), float(re_ff_et[i])))
+    thrust_calc_in_file.close()
+    
+    subprocess.call([path_to_thrust_file])
+    
+    thrust_le = []
+    thrust_re = []
+    
+    with open("thrust.dat") as f:
+        all_lines = f.readlines()
+    f.close()
+    
+    for line in all_lines:
+        thrust_le.append(float(line.strip().split()[0]))
+        thrust_re.append(float(line.strip().split()[1]))
+    
+    thrust_le = np.array(thrust_le)
+    thrust_re = np.array(thrust_re)
+    
+    thrust_tot = thrust_le + thrust_re
+    
+    TC = thrust_tot/(0.5*rho_et*VTAS_et**2*S)
+    
+    # Get standard thrust coefficient by entering the standard fuel flow into 
+    # the thrust.exe file
+    thrust_calc_in_file = open("matlab.dat", "w")
+    thrust_calc_in_file.write("{} {} {} {} {}\n".format(float(np.average(hp_et)), float(np.average(M_et)), float(np.average(delta_T_et)), 0.048, 0.048))
+    thrust_calc_in_file.close()
+    
+    subprocess.call([path_to_thrust_file])
+    
+    thrust_le = []
+    thrust_re = []
+    
+    with open("thrust.dat") as f:
+        all_lines = f.readlines()
+    f.close()
+    
+    thrust_le = float(line.strip().split()[0])
+    thrust_re = float(line.strip().split()[1])
+    
+    thrust_tots = thrust_le + thrust_re
+    
+    TCs = thrust_tots/(0.5*np.average(rho_et)*np.average(VTAS_et)**2*S)
+    
+    # reduced elevator deflection
+    Cmtc        = -0.0064 # appendix C
+    d_e_eq_meas = 0.5
+    
+    de_et_red   = d_e_eq_meas - 1/Cmde * Cmtc * (TCs-TC)
+    print(Cmtc, TCs, TC)
+    
     if show_plots:
         print("Cmde = {}".format(Cmde))
         print("Cma = {}".format(Cma))
         
-        fig, ax = plt.subplots(1, 3)
+        fig, ax = plt.subplots(1, 4)
         ax[0].plot(alpha_et, de_et, marker="o", linestyle="None", label="Data")
         ax[0].plot(alpha_et, dde_alpha*alpha_et + intersect, label="Linear Fit")
         ax[0].set(xlabel=r"$\alpha$ [°]", ylabel=r"$\delta_e$ [°]", title="Elevator-Trim Curve")
@@ -225,7 +325,10 @@ def stat_meas_2(show_plots=False):
         ax[1].set(xlabel=r"$V_c$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Elevator-Trim Curve")
         
         ax[2].plot(V_et_red, de_et, marker="o", linestyle="None")
-        ax[2].set(xlabel=r"$\tilde{V}_c$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Elevator-Trim Curve")
+        ax[2].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Elevator-Trim Curve")
+        
+        ax[3].plot(V_et_red, de_et_red, marker="o", linestyle="None")
+        ax[3].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\tilde{\delta}_e$ [°]", title="Reduced Elevator-Trim Curve")
         
         plt.show()
     

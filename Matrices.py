@@ -6,8 +6,13 @@ This is a temporary script file.
 """
 from control import ss
 from control.matlab import step, impulse, initial, lsim
+
 import matplotlib.pyplot as plt
+
 import numpy as np
+
+import os
+
 
 import grafiekjesmakenyay
 
@@ -15,13 +20,22 @@ import Cit_par_new
 
 import read_mat_data
 
-data, unit, description, keys = read_mat_data.read_mat("reference_data.mat")
+use_reference_data = True
+
+if use_reference_data:
+    data_name = "reference_data.mat"
+else:
+    data_name = os.path.join("flight data", "FTISxprt-20190318_124004.mat")
+
+data, unit, description, keys = read_mat_data.read_mat(data_name)
 
 
 
 # collect parameters derived from stationary measurements
-CLarad, CD0, e = Cit_par_new.stat_meas_1()
-Cmde, Cma = Cit_par_new.stat_meas_2()
+# first boolean is to indicate whether or not to use the reference data, the
+# second one is to print and plot the curves (elevator-trim etc.)
+CLarad, CD0, e = Cit_par_new.stat_meas_1(use_reference_data, False)
+Cmde, Cma = Cit_par_new.stat_meas_2(use_reference_data, False)
 
 
 def sysmat(C1,C2,C3):
@@ -99,6 +113,13 @@ def asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, CYdr, CYda,
 
 name_sym_eigenm = ["Short Period", "Phugoid"]
 
+# our times
+# =============================================================================
+# T_st_sym = [(61,35), (58, 56)]
+# T_en_sym = [(62,20), (61, 4)]
+# =============================================================================
+
+# reference times
 T_st_sym = [(60,25), (53, 40)]
 T_en_sym = [(60,31), (57, 30)]
 
@@ -111,8 +132,15 @@ for i in range(len(name_sym_eigenm)):
     
     print("\nSimulating "+name_sym_eigenm[i]+" ...")
     
+    # determine length of simulation (add the 0.1 to the end time to include 
+    # the end time)
     T = np.arange(0, T_en_sym[i][0]*60 + T_en_sym[i][1] - T_st_sym[i][0]*60 - T_st_sym[i][1] + 0.1, 0.1)
     
+    # get elevator input from flight data (only elevator in symmetric 
+    # condition) and use this as elevator input for the model
+    dummy, elevator_input = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "delta_e", data)
+    
+    # build system matrices with stability constants
     (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
      KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, 
      CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb, 
@@ -125,19 +153,18 @@ for i in range(len(name_sym_eigenm)):
     sysSym, A = sym_matrices(c, muc, V0, KY2, CX0, CXa, CXde, CXu, CXq, CZ0, 
                              CZa, CZadot, CZde, CZu, CZq, Cmadot, Cmu, Cmq)
     
+    # determine eigenvalues
     eig = np.linalg.eig(A)[0]
     print("Eigenvalue = {}".format(eig[2*i]))
     
-    [y_sym,t_sym,x_sym] = lsim(sysSym, inp_sym[i], T)
+    # simulate system response
+    [y_sym,t_sym,x_sym] = lsim(sysSym, elevator_input, T)#lsim(sysSym, inp_sym[i], T)
     
+    # collect the actual response data (from flight test)
     #tlistu, delistu = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "Dadc1_tas", data)
     tlista, delista = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "vane_AOA", data)
     tlistt, delistt = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "Ahrs1_Pitch", data)
     tlistq, delistq = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "Ahrs1_bPitchRate", data)
-    
-    #ax.plot(t, np.rad2deg(y_sym[:,1] + alpha0), label="simulated")
-    #ax.set(xlabel="elapsed time [s]")
-    #ax.legend()
     
     fig1, ax1 = plt.subplots(2, 2)
     fig1.suptitle("Symmetric: " + name_sym_eigenm[i])
@@ -168,6 +195,13 @@ for i in range(len(name_sym_eigenm)):
 
 name_asym_eigenm = ["Aperiodic Roll", "Dutch Roll", "Spiral"]
 
+# our times
+# =============================================================================
+# T_st_asym = [(65,4), (63,3), (68,50)]
+# T_en_asym = [(68,0), (63,23), (70,50)]
+# =============================================================================
+
+# reference times
 T_st_asym = [(59,10), (61,50), (65,22)]
 T_en_asym = [(59,30), (62,35), (65,50)]
 
@@ -185,13 +219,22 @@ for i in range(len(name_asym_eigenm)):
     
     print("\nSimulating "+name_asym_eigenm[i]+" ...")
     
+    # collect the actual response data (from flight test)
     tlistb, delistb = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Fms1_trueHeading", data)
     tlisth, delisth = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_Roll", data)
     tlistp, delistp = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_bYawRate", data)
     tlistr, delistr = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_bRollRate", data)
     
+    # determine length of simulation (add the 0.1 to the end time to include 
+    # the end time)
     T = np.arange(0, T_en_asym[i][0]*60 + T_en_asym[i][1] - T_st_asym[i][0]*60 - T_st_asym[i][1] + 0.1, 0.1)
     
+    # get aileron and rudder input from flight data (for asymmetric condition) 
+    # and use this as aileron and rudder input for the model
+    dummy, aileron_input = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "delta_a", data)
+    dummy, rudder_input  = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "delta_r", data)
+    
+    # build system matrices with stability constants
     (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
      KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, 
      CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb, 
@@ -205,6 +248,7 @@ for i in range(len(name_asym_eigenm)):
                                CYr, CYdr, CYda, CL, Clda, Clb, Clp, Clr, Cldr, 
                                Cnda, Cnb, Cnbdot, Cnp, Cnr, Cndr)
     
+    # determine eigenvalues
     eig = np.linalg.eig(A)[0]
     
     
@@ -221,7 +265,7 @@ for i in range(len(name_asym_eigenm)):
         [y_asym,t_asym] = step(sysAsym, T)
         
     else:
-        [y_asym,t_asym,x_sym] = lsim(sysAsym, inp_asym[i], T, X0)
+        [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_input, rudder_input)).T, T, X0)# lsim(sysAsym, inp_asym[i], T, X0)
     
     fig2, ax2 = plt.subplots(2, 2)
     fig2.suptitle("Asymmetric: " + name_asym_eigenm[i])
