@@ -187,17 +187,18 @@ for i in range(len(name_sym_eigenm)):
     ax1[0,0].legend()
     
     ax1[0,1].plot(tlista-tlista[0], delista, label="test data")
-    ax1[0,1].plot(tlista-tlista[0], y_sym[:,1] + np.rad2deg(alpha0), label=r"$\alpha$")
+    ax1[0,1].plot(tlista-tlista[0], y_sym[:,1] + np.rad2deg(alpha0), label="simulated data$")
     ax1[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\alpha$ [°]", title="angle of attack")
     ax1[0,1].legend()
     
     ax1[1,0].plot(tlistt-tlistt[0], delistt, label="test data")
-    ax1[1,0].plot(tlistt-tlistt[0], y_sym[:,2] + np.rad2deg(th0), label=r"$\theta$")
+    ax1[1,0].plot(tlistt-tlistt[0], y_sym[:,2] + np.rad2deg(th0), label="simulated data")
     ax1[1,0].set(xlabel="elapsed time [s]", ylabel=r"$\theta$ [°]", title="pitch angle")
     ax1[1,0].legend()
     
+    q0 = delistq[0]
     ax1[1,1].plot(tlistq-tlistq[0], delistq, label="test data")
-    ax1[1,1].plot(tlistq-tlistq[0], y_sym[:,3], label="q")
+    ax1[1,1].plot(tlistq-tlistq[0], y_sym[:,3] + q0, label="simulated data")
     ax1[1,1].set(xlabel="elapsed time [s]", ylabel=r"q [°/s]", title="pitch rate")
     ax1[1,1].legend()
 
@@ -219,13 +220,6 @@ else:
 
 T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
 T_en_asym_s = [T_en_asym[0][0]*60 + T_en_asym[0][1], T_en_asym[1][0]*60 + T_en_asym[1][1], T_en_asym[2][0]*60 + T_en_asym[2][1]]
-
-nr_points_aroll = (T_en_asym[0][0]*60+T_en_asym[0][1] - (T_st_asym[0][0]*60+T_st_asym[0][1]))*10 + 1
-input_aroll = np.vstack((np.ones(nr_points_aroll)*3, np.zeros(nr_points_aroll)))
-nr_points_dutchroll = (T_en_asym[1][0]*60+T_en_asym[1][1] - (T_st_asym[1][0]*60+T_st_asym[1][1]))*10 + 1
-input_dutchroll = np.vstack((np.zeros(nr_points_dutchroll), np.hstack((np.array([-45, 45, -45]), np.zeros(nr_points_dutchroll - 3))))).T
-inp_asym = [input_aroll.T, input_dutchroll, 0.0]
-
 
 for i in range(len(name_asym_eigenm)):
     
@@ -269,21 +263,17 @@ for i in range(len(name_asym_eigenm)):
         print("Analytical eigenvalue = {}".format(lambda_list_asym[-1]))
         print("Difference Real = {}".format((np.absolute(np.real(lambda_list_asym[-1])-np.real(eig[-1])))/np.real(eig[-1])*100))
         print("Difference Imaginary = {}".format((np.absolute(np.imag(lambda_list_asym[-1])-np.imag(eig[-1])))/np.imag(eig[-1])*100))
-        X0 = np.array([[0], [10], [0], [0]])
         
     else:
         print("Eigenvalue = {}".format(eig[i]))
-        X0 = 0
         print("Analytical eigenvalue = {}".format(lambda_list_asym[i]))
         print("Difference Real = {}".format((np.absolute(np.real(lambda_list_asym[i])-np.real(eig[i])))/np.real(eig[i])*100))
         print("Difference Imaginary = {}".format((np.absolute(np.imag(lambda_list_asym[i])-np.imag(eig[i])))/np.imag(eig[i])*100))
     
-    if name_asym_eigenm[i] == "Aperiodic Roll":
-        # default is step on input 1, in our case the aileron:
-        [y_asym,t_asym] = step(sysAsym, T)
-        
-    else:
-        [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_input, rudder_input)).T, T, X0)# lsim(sysAsym, inp_asym[i], T, X0)
+    
+    # simulate system response
+    [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_input, -1*rudder_input)).T, T)
+    
     
     fig2, ax2 = plt.subplots(2, 2)
     fig2.suptitle("Asymmetric: " + name_asym_eigenm[i])
@@ -293,19 +283,22 @@ for i in range(len(name_asym_eigenm)):
     ax2[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\beta$ [°]", title="sideslip angle")
     ax2[0,0].legend()
     
+    phi0 = delisth[0]
     ax2[0,1].plot(tlisth-tlisth[0], delisth, label="test data")
-    ax2[0,1].plot(tlisth-tlisth[0], y_asym[:,1], label=r"$\phi$")
+    ax2[0,1].plot(tlisth-tlisth[0], y_asym[:,1] + phi0, label=r"$\phi$")
     ax2[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\phi$ [°]", title="roll angle")
     ax2[0,1].legend()
     
-    ax2[1,0].plot(tlistp-tlistp[0], delistp, label="test data")
-    ax2[1,0].plot(tlistp-tlistp[0], y_asym[:,2], label="p")
-    ax2[1,0].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="yaw rate")
+    r0 = delistr[0]
+    ax2[1,0].plot(tlistr-tlistr[0], delistr, label="test data")
+    ax2[1,0].plot(tlistr-tlistr[0], y_asym[:,2] + r0, label="p")
+    ax2[1,0].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="yaw rate")
     ax2[1,0].legend()
     
-    ax2[1,1].plot(tlistr-tlistr[0], delistr, label="test data")
-    ax2[1,1].plot(tlistr-tlistr[0], y_asym[:,3], label="r")
-    ax2[1,1].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="roll rate")
+    p0 = delistp[0]
+    ax2[1,1].plot(tlistp-tlistp[0], delistp, label="test data")
+    ax2[1,1].plot(tlistp-tlistp[0], y_asym[:,3] + p0, label="r")
+    ax2[1,1].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="roll rate")
     ax2[1,1].legend()
     
     plt.legend()
