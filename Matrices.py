@@ -20,7 +20,7 @@ import Cit_par_new
 
 import read_mat_data
 
-use_reference_data = True
+use_reference_data = False
 
 if use_reference_data:
     data_name = "reference_data.mat"
@@ -113,15 +113,15 @@ def asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, CYdr, CYda,
 
 name_sym_eigenm = ["Short Period", "Phugoid"]
 
-# our times
-# =============================================================================
-# T_st_sym = [(61,35), (58, 56)]
-# T_en_sym = [(62,20), (61, 4)]
-# =============================================================================
+if use_reference_data:
+    # reference times
+    T_st_sym = [(60,25), (53, 40)]
+    T_en_sym = [(60,31), (57, 30)]
 
-# reference times
-T_st_sym = [(60,25), (53, 40)]
-T_en_sym = [(60,31), (57, 30)]
+else:
+    # our times
+    T_st_sym = [(61,35), (58, 56)]
+    T_en_sym = [(62,20), (61, 4)]
 
 T_st_sym_s = [T_st_sym[0][0]*60 + T_st_sym[0][1], T_st_sym[1][0]*60 + T_st_sym[1][1]]
 T_en_sym_s = [T_en_sym[0][0]*60 + T_en_sym[0][1], T_en_sym[1][0]*60 + T_en_sym[1][1]]
@@ -195,15 +195,15 @@ for i in range(len(name_sym_eigenm)):
 
 name_asym_eigenm = ["Aperiodic Roll", "Dutch Roll", "Spiral"]
 
-# our times
-# =============================================================================
-# T_st_asym = [(65,4), (63,3), (68,50)]
-# T_en_asym = [(68,0), (63,23), (70,50)]
-# =============================================================================
+if use_reference_data:
+    # reference times
+    T_st_asym = [(59,10), (61,50), (65,22)]
+    T_en_asym = [(59,30), (62,35), (65,50)]
 
-# reference times
-T_st_asym = [(59,10), (61,50), (65,22)]
-T_en_asym = [(59,30), (62,35), (65,50)]
+else:
+    # our times
+    T_st_asym = [(65,4), (63,3), (68,50)]
+    T_en_asym = [(68,0), (63,23), (70,50)]
 
 T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
 T_en_asym_s = [T_en_asym[0][0]*60 + T_en_asym[0][1], T_en_asym[1][0]*60 + T_en_asym[1][1], T_en_asym[2][0]*60 + T_en_asym[2][1]]
