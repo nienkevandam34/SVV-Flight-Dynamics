@@ -216,7 +216,7 @@ if use_reference_data:
 
 else:
     # our times
-    T_st_asym = [(65,4), (63,3), (68,50)]
+    T_st_asym = [(65,29), (63,3), (68,50)]
     T_en_asym = [(68,0), (63,23), (70,50)]
 
 T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
@@ -258,23 +258,21 @@ for i in range(len(name_asym_eigenm)):
     # determine eigenvalues
     eig = np.linalg.eig(A)[0]
     
-    
     if name_asym_eigenm[i] == "Spiral":
         print("Eigenvalue = {}".format(eig[-1]))
-        X0 = np.array([[0], [10], [0], [0]])
+        print("Analytical eigenvalue = {}".format(lambda_list_asym[-1]))
         
     else:
         print("Eigenvalue = {}".format(eig[i]))
-        X0 = 0
+        print("Analytical eigenvalue = {}".format(lambda_list_asym[i]))
     
-    print("Analytical eigenvalue = {}".format(lambda_list_asym[i]))
     
     if name_asym_eigenm[i] == "Aperiodic Roll":
         # default is step on input 1, in our case the aileron:
         [y_asym,t_asym] = step(sysAsym, T)
         
     else:
-        [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_input, rudder_input)).T, T, X0)# lsim(sysAsym, inp_asym[i], T, X0)
+        [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_input, -1*rudder_input)).T, T)# lsim(sysAsym, inp_asym[i], T, X0)
     
     fig2, ax2 = plt.subplots(2, 2)
     fig2.suptitle("Asymmetric: " + name_asym_eigenm[i])
@@ -291,14 +289,14 @@ for i in range(len(name_asym_eigenm)):
     ax2[0,1].legend()
     
     r0 = delistr[0]
-    ax2[1,0].plot(tlistp-tlistr[0], delistr, label="test data")
-    ax2[1,0].plot(tlistp-tlistr[0], y_asym[:,2] + r0, label="simulated data")
+    ax2[1,0].plot(tlistr-tlistr[0], delistr, label="test data")
+    ax2[1,0].plot(tlistr-tlistr[0], y_asym[:,2] + r0, label="simulated data")
     ax2[1,0].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="yaw rate")
     ax2[1,0].legend()
     
     p0 = delistp[0]
-    ax2[1,1].plot(tlistr-tlistp[0], delistp, label="test data")
-    ax2[1,1].plot(tlistr-tlistp[0], y_asym[:,3] + p0, label="simulated data")
+    ax2[1,1].plot(tlistp-tlistp[0], delistp, label="test data")
+    ax2[1,1].plot(tlistp-tlistp[0], y_asym[:,3] + p0, label="simulated data")
     ax2[1,1].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="roll rate")
     ax2[1,1].legend()
     
