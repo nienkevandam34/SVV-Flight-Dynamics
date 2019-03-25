@@ -21,6 +21,8 @@ import Cit_par_new
 
 import read_mat_data
 
+# NOTE: the reference data and the real data have a different sign for the 
+# aileron (and maybe also for the rudder and elevator??)
 use_reference_data = False
 
 if use_reference_data:
@@ -216,7 +218,7 @@ if use_reference_data:
 else:
     # our times
     T_st_asym = [(65,4), (63,3), (68,50)]
-    T_en_asym = [(68,0), (63,23), (70,50)]
+    T_en_asym = [(68,0), (63,23), (69,20)]
 
 T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
 T_en_asym_s = [T_en_asym[0][0]*60 + T_en_asym[0][1], T_en_asym[1][0]*60 + T_en_asym[1][1], T_en_asym[2][0]*60 + T_en_asym[2][1]]
@@ -272,7 +274,7 @@ for i in range(len(name_asym_eigenm)):
     
     
     # simulate system response
-    [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_input, -1*rudder_input)).T, T)
+    [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((-1*aileron_input, -1*rudder_input)).T, T)
     
     
     fig2, ax2 = plt.subplots(2, 2)
