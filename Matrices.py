@@ -196,8 +196,10 @@ for i in range(len(name_sym_eigenm)):
     ax1[1,0].set(xlabel="elapsed time [s]", ylabel=r"$\theta$ [°]", title="pitch angle")
     ax1[1,0].legend()
     
+    
+    q0 = delistq[0]
     ax1[1,1].plot(tlistq-tlistq[0], delistq, label="test data")
-    ax1[1,1].plot(tlistq-tlistq[0], y_sym[:,3], label="q")
+    ax1[1,1].plot(tlistq-tlistq[0], y_sym[:,3] + q0, label="q")
     ax1[1,1].set(xlabel="elapsed time [s]", ylabel=r"q [°/s]", title="pitch rate")
     ax1[1,1].legend()
 
@@ -282,18 +284,21 @@ for i in range(len(name_asym_eigenm)):
     ax2[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\beta$ [°]", title="sideslip angle")
     ax2[0,0].legend()
     
+    phi0 = delisth[0]
     ax2[0,1].plot(tlisth-tlisth[0], delisth, label="test data")
-    ax2[0,1].plot(tlisth-tlisth[0], y_asym[:,1], label=r"$\phi$")
+    ax2[0,1].plot(tlisth-tlisth[0], y_asym[:,1] + phi0, label="simulated data")
     ax2[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\phi$ [°]", title="roll angle")
     ax2[0,1].legend()
     
+    r0 = delistr[0]
     ax2[1,0].plot(tlistp-tlistr[0], delistr, label="test data")
-    ax2[1,0].plot(tlistp-tlistr[0], y_asym[:,2], label="p")
+    ax2[1,0].plot(tlistp-tlistr[0], y_asym[:,2] + r0, label="simulated data")
     ax2[1,0].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="yaw rate")
     ax2[1,0].legend()
     
+    p0 = delistp[0]
     ax2[1,1].plot(tlistr-tlistp[0], delistp, label="test data")
-    ax2[1,1].plot(tlistr-tlistp[0], y_asym[:,3], label="r")
+    ax2[1,1].plot(tlistr-tlistp[0], y_asym[:,3] + p0, label="simulated data")
     ax2[1,1].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="roll rate")
     ax2[1,1].legend()
     
