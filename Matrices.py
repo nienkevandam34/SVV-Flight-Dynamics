@@ -21,7 +21,7 @@ import Cit_par_new
 
 import read_mat_data
 
-use_reference_data = True
+use_reference_data = False
 
 if use_reference_data:
     data_name = "reference_data.mat"
@@ -187,19 +187,18 @@ for i in range(len(name_sym_eigenm)):
     ax1[0,0].legend()
     
     ax1[0,1].plot(tlista-tlista[0], delista, label="test data")
-    ax1[0,1].plot(tlista-tlista[0], y_sym[:,1] + np.rad2deg(alpha0), label=r"$\alpha$")
+    ax1[0,1].plot(tlista-tlista[0], y_sym[:,1] + np.rad2deg(alpha0), label="simulated data")
     ax1[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\alpha$ [°]", title="angle of attack")
     ax1[0,1].legend()
     
     ax1[1,0].plot(tlistt-tlistt[0], delistt, label="test data")
-    ax1[1,0].plot(tlistt-tlistt[0], y_sym[:,2] + np.rad2deg(th0), label=r"$\theta$")
+    ax1[1,0].plot(tlistt-tlistt[0], y_sym[:,2] + np.rad2deg(th0), label="simulated data")
     ax1[1,0].set(xlabel="elapsed time [s]", ylabel=r"$\theta$ [°]", title="pitch angle")
     ax1[1,0].legend()
     
-    
     q0 = delistq[0]
     ax1[1,1].plot(tlistq-tlistq[0], delistq, label="test data")
-    ax1[1,1].plot(tlistq-tlistq[0], y_sym[:,3] + q0, label="q")
+    ax1[1,1].plot(tlistq-tlistq[0], y_sym[:,3] + q0, label="simulated data")
     ax1[1,1].set(xlabel="elapsed time [s]", ylabel=r"q [°/s]", title="pitch rate")
     ax1[1,1].legend()
 
@@ -216,7 +215,7 @@ if use_reference_data:
 
 else:
     # our times
-    T_st_asym = [(65,29), (63,3), (68,50)]
+    T_st_asym = [(65,4), (63,3), (68,50)]
     T_en_asym = [(68,0), (63,23), (70,50)]
 
 T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
@@ -267,12 +266,8 @@ for i in range(len(name_asym_eigenm)):
         print("Analytical eigenvalue = {}".format(lambda_list_asym[i]))
     
     
-    if name_asym_eigenm[i] == "Aperiodic Roll":
-        # default is step on input 1, in our case the aileron:
-        [y_asym,t_asym] = step(sysAsym, T)
-        
-    else:
-        [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_input, -1*rudder_input)).T, T)# lsim(sysAsym, inp_asym[i], T, X0)
+    # simulate system response
+    [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_input, -1*rudder_input)).T, T)# lsim(sysAsym, inp_asym[i], T, X0)
     
     fig2, ax2 = plt.subplots(2, 2)
     fig2.suptitle("Asymmetric: " + name_asym_eigenm[i])

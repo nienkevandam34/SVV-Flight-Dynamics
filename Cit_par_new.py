@@ -360,7 +360,7 @@ def stab_coef(tstart, tend, CLarad, CD0, e, data):
     # collecting data
     time  = data["time"]
     ind   = np.where(np.logical_and(time>=tstart, time <= tend)) # index
-    hp    = data["Dadc1_alt"][ind] * 0.3048                # m
+    hp    = data["Dadc1_alt"][ind] * 0.3048                      # m
     le_FU = data["lh_engine_FU"][ind] * 0.453592                 # kg
     re_FU = data["rh_engine_FU"][ind] * 0.453592                 # kg
     VTAS  = data["Dadc1_tas"][ind] * 0.5144444                   # m/s

@@ -6,13 +6,13 @@ Created on Tue Mar 12 15:11:10 2019
 """
 
 
-
+import numpy as np
 
 
 def plot_real_data(tstart, tend, value, data):
     def knippen(tmin_s,tsec_s,tmin_e,tsec_e,lst,tlst):  
-        starttime = 60*tmin_s + tsec_s
-        endtime= 60*tmin_e + tsec_e
+        starttime = 60*tmin_s + tsec_s - int(tlst[0])
+        endtime= 60*tmin_e + tsec_e - int(tlst[0])
         newlist=lst[starttime*10:endtime*10+1]
         newtlist=tlst[starttime*10:endtime*10+1]
         return newlist, newtlist    
