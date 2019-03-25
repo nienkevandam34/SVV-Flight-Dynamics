@@ -165,7 +165,8 @@ for i in range(len(name_sym_eigenm)):
     # determine eigenvalues
     eig = np.linalg.eig(A)[0]
     print("Eigenvalue = {}".format(eig[2*i]))
-    print("Analytical eigenvalue = {}".format(lambda_list_sym[i])) # "percentage off =",lambda_list_sym[i]/eig[2*i]*100)
+    print("Analytical eigenvalue = {}".format(lambda_list_sym[i][0])) # "percentage off =",lambda_list_sym[i]/eig[2*i]*100)
+    print("Difference = {}".format(np.absolute(lambda_list_sym[i][0]-eig[2*i])))
     
     # simulate system response
     [y_sym,t_sym,x_sym] = lsim(sysSym, elevator_input, T)#lsim(sysSym, inp_sym[i], T)
@@ -271,6 +272,7 @@ for i in range(len(name_asym_eigenm)):
         X0 = 0
     
     print("Analytical eigenvalue = {}".format(lambda_list_asym[i]))
+    print("Difference = {}".format(np.absolute(lambda_list_asym[i]-eig[i])))
     
     if name_asym_eigenm[i] == "Aperiodic Roll":
         # default is step on input 1, in our case the aileron:
