@@ -166,7 +166,8 @@ for i in range(len(name_sym_eigenm)):
     eig = np.linalg.eig(A)[0]
     print("Eigenvalue = {}".format(eig[2*i]))
     print("Analytical eigenvalue = {}".format(lambda_list_sym[i][0])) # "percentage off =",lambda_list_sym[i]/eig[2*i]*100)
-    print("Difference = {}".format(np.absolute(lambda_list_sym[i][0]-eig[2*i])))
+    print("Difference real = {}".format((np.absolute(np.real(lambda_list_sym[i][0])-np.real(eig[2*i])))/np.real(eig[2*i])*100))
+    print("Difference imaginary = {}".format((np.absolute(np.imag(lambda_list_sym[i][0])-np.imag(eig[2*i])))/np.imag(eig[2*i])*100))
     
     # simulate system response
     [y_sym,t_sym,x_sym] = lsim(sysSym, elevator_input, T)#lsim(sysSym, inp_sym[i], T)
@@ -265,14 +266,17 @@ for i in range(len(name_asym_eigenm)):
     
     if name_asym_eigenm[i] == "Spiral":
         print("Eigenvalue = {}".format(eig[-1]))
+        print("Analytical eigenvalue = {}".format(lambda_list_asym[-1]))
+        print("Difference Real = {}".format((np.absolute(np.real(lambda_list_asym[-1])-np.real(eig[-1])))/np.real(eig[-1])*100))
+        print("Difference Imaginary = {}".format((np.absolute(np.imag(lambda_list_asym[-1])-np.imag(eig[-1])))/np.imag(eig[-1])*100))
         X0 = np.array([[0], [10], [0], [0]])
         
     else:
         print("Eigenvalue = {}".format(eig[i]))
         X0 = 0
-    
-    print("Analytical eigenvalue = {}".format(lambda_list_asym[i]))
-    print("Difference = {}".format(np.absolute(lambda_list_asym[i]-eig[i])))
+        print("Analytical eigenvalue = {}".format(lambda_list_asym[i]))
+        print("Difference Real = {}".format((np.absolute(np.real(lambda_list_asym[i])-np.real(eig[i])))/np.real(eig[i])*100))
+        print("Difference Imaginary = {}".format((np.absolute(np.imag(lambda_list_asym[i])-np.imag(eig[i])))/np.imag(eig[i])*100))
     
     if name_asym_eigenm[i] == "Aperiodic Roll":
         # default is step on input 1, in our case the aileron:

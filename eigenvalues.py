@@ -8,11 +8,11 @@ import numpy as np
 import Cit_par_new
 
 def findeigenvalues(CLarad, CD0, e, data, motion):
-    Cmde,Cma= Cit_par_new.stat_meas_2(show_plots=False)
+    Cmde,Cma= Cit_par_new.stat_meas_2(use_reference_data=False, show_plots=False)
     
     if motion=="Phugoid":
-        tstart=61*60+35
-        tend=62*60+20
+        tstart=58*60+56
+        tend=61*60+4
         (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb,  CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b)=Cit_par_new.stab_coef(tstart, tend, CLarad, CD0, e, data)
         
         # qdot = 0, a = 0
@@ -29,8 +29,9 @@ def findeigenvalues(CLarad, CD0, e, data, motion):
         lambda_ = np.roots(coeff_4)*V0/c
         
     elif motion=="Short Period":
-        tstart=58*60+56
-        tend=61*60+4
+        
+        tstart=61*60+35
+        tend=62*60+20
         (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, KXZ, KY2, Cmac, CNwa, CNha, depsda, CL, CD, CX0, CXu, CXa, CXadot, CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb,  CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b)=Cit_par_new.stab_coef(tstart, tend, CLarad, CD0, e, data)
         
         # A*labda^2 + B*labda + C = 0
