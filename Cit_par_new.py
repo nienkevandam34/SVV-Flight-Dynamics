@@ -37,7 +37,6 @@ Vh_V   = 1	              # [ ]
 ih     = -2 * np.pi / 180 # stabiliser angle of incidence [rad]
 # end pre-specified values ----------------------------------------------------
 p0     = 101325           # sea-level pressure [Pa]  
-ramp_mass = 6689.22       # kg
 
 
 
@@ -62,7 +61,7 @@ def flight_variables(hp, Vc, Tm):
 
 
 
-def stat_meas_1(use_reference_data=False, show_plots=False):
+def stat_meas_1(ramp_mass, use_reference_data=False, show_plots=False):
     
     print("Using stationary measurements 1 ...")
     
@@ -175,7 +174,7 @@ def stat_meas_1(use_reference_data=False, show_plots=False):
 
 # xcg = 0.25 * c
 
-def stat_meas_2(use_reference_data=False, show_plots=False):
+def stat_meas_2(ramp_mass, use_reference_data=False, show_plots=False):
     
     print("Using stationary measurements 2 ...")
     
@@ -314,7 +313,7 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
     
     # reduced stick force curve
     # Force for friction is neglected (see reader and appendix B of assignment)
-    F_stick_et_red = F_stick_et * Ws/W
+    F_stick_et_red = F_stick_et * Ws/W_et
     
     
     if show_plots:
@@ -337,7 +336,7 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
         ax[1,0].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs reduced equivalent airspeed")
         
         ax[1,1].plot(V_et_red, de_et_red, marker="o", linestyle="None")
-        ax[1,1].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\tilde{\delta}_e$ [°]", title="Reduced Elevator-Trim Curve")
+        ax[1,1].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\star{\delta}_e$ [°]", title="Reduced Elevator-Trim Curve")
         
         
         fig2, ax2 = plt.subplots(2, 2)
@@ -354,12 +353,12 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
         ax2[1,0].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel="F [N]", title="Real force vs reduced equivalent airspeed")
         
         ax2[1,1].plot(V_et_red, F_stick_et_red, marker="o", linestyle="None")
-        ax2[1,1].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel="F [N]", title="Reduced Elevator Control Force Curve")
+        ax2[1,1].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\star{F}$ [N]", title="Reduced Elevator Control Force Curve")
         
     return Cmde, Cma
 
 
-def stab_coef(tstart, tend, CLarad, CD0, e, data):
+def stab_coef(tstart, tend, ramp_mass, CLarad, CD0, e, data):
     
     print("Determining stability coefficients ...")
     
@@ -380,13 +379,12 @@ def stab_coef(tstart, tend, CLarad, CD0, e, data):
     alpha0 = np.deg2rad(data["vane_AOA"][ind][0]) # angle of attack at the start of the maneuvre [rad]
     th0    = np.deg2rad(data["Ahrs1_Pitch"][ind][0]) # pitch angle at the start of the maneuvre [rad]
     
-    # Aircraft mass
+    # Aircraft mass at start of the manouvre
     m      = m[0]        # mass [kg]
     
     # aerodynamic properties
     CD0f   = CD0         # Zero lift drag coefficient [ ]
     CLaf   = CLarad      # Slope of CL-alpha curve [ ]
-    ## End Initial Conditions ---
     
     
     

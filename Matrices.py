@@ -31,9 +31,11 @@ use_reference_data = False
 if use_reference_data:
     data_name = "reference_data.mat"
     aileron_sign = 1
+    ramp_mass = 6689.22       # kg
 else:
     data_name = os.path.join("flight data", "FTISxprt-20190318_124004.mat")
     aileron_sign = -1
+    ramp_mass = 6676.153939   # kg
 
 data, unit, description, keys = read_mat_data.read_mat(data_name)
 
@@ -42,14 +44,14 @@ data, unit, description, keys = read_mat_data.read_mat(data_name)
 # collect parameters derived from stationary measurements
 # first boolean is to indicate whether or not to use the reference data, the
 # second one is to print and plot the curves (elevator-trim etc.)
-CLarad, CD0, e = Cit_par_new.stat_meas_1(use_reference_data, False)
-Cmde, Cma = Cit_par_new.stat_meas_2(use_reference_data, False)
+CLarad, CD0, e = Cit_par_new.stat_meas_1(ramp_mass, use_reference_data, False)
+Cmde, Cma = Cit_par_new.stat_meas_2(ramp_mass, use_reference_data, False)
 
-lambda_short = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Short Period")
-lambda_phug = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Phugoid")
-lambda_roll = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Highly Damped Aperiodic Roll")
-lambda_dutch = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Dutch Roll")
-lambda_spiral = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Aperiodic Spiral")
+lambda_short = eigenvalues.findeigenvalues(ramp_mass, CLarad, CD0, e, data, "Short Period")
+lambda_phug = eigenvalues.findeigenvalues(ramp_mass, CLarad, CD0, e, data, "Phugoid")
+lambda_roll = eigenvalues.findeigenvalues(ramp_mass, CLarad, CD0, e, data, "Highly Damped Aperiodic Roll")
+lambda_dutch = eigenvalues.findeigenvalues(ramp_mass, CLarad, CD0, e, data, "Dutch Roll")
+lambda_spiral = eigenvalues.findeigenvalues(ramp_mass, CLarad, CD0, e, data, "Aperiodic Spiral")
 
 lambda_list_sym  = [lambda_short, lambda_phug]
 lambda_list_asym = [lambda_roll, lambda_dutch, lambda_spiral]
@@ -164,7 +166,8 @@ for i in range(len(name_sym_eigenm)):
      CXq, CXde, CZ0, CZu, CZa, CZadot, CZq, CZde, Cmu, Cmadot, Cmq, CYb, 
      CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, 
      Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b) = Cit_par_new.stab_coef(T_st_sym_s[i], 
-                                                                 T_en_sym_s[i], 
+                                                                 T_en_sym_s[i],
+                                                                 ramp_mass, 
                                                                  CLarad, CD0, e,
                                                                  data)
     
@@ -254,6 +257,7 @@ for i in range(len(name_asym_eigenm)):
      CYbdot, CYp, CYr, CYda, CYdr, Clb, Clp, Clr, Clda, Cldr, Cnb, 
      Cnbdot, Cnp, Cnr, Cnda, Cndr, c, b) = Cit_par_new.stab_coef(T_st_asym_s[i], 
                                                                  T_en_asym_s[i],
+                                                                 ramp_mass,
                                                                  CLarad, CD0, e,
                                                                  data)
     
