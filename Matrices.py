@@ -9,6 +9,7 @@ from control.matlab import lsim
 
 import matplotlib.pyplot as plt
 
+import scipy
 import numpy as np
 
 import os
@@ -101,18 +102,18 @@ def asym_matrices(b, mub, V0, KX2, KZ2, KXZ, CYb, CYbdot, CYp, CYr, CYdr, CYda,
     
     print("Assemblying asymmetric system matrices ...")
     
-    C1_asym = np.matrix([[(CYbdot-2*mub)*(b/V0),0,0,0],
-                 [0,-.5*b/V0,0,0],
-                 [0,0,-2*mub*KX2*(b**2)/(V0**2),2*mub*KXZ*(b**2)/(V0**2)],
-                 [Cnbdot*b/V0,0,2*mub*KXZ*(b**2)/(V0**2),-2*mub*KZ2*(b**2)/(V0**2)]])
+    C1_asym = np.matrix([[(CYbdot-2*mub)*(b/V0), 0,        0,                         0],
+                         [0,                     -.5*b/V0, 0,                         0],
+                         [0,                     0,        -2*mub*KX2*(b**2)/(V0**2), 2*mub*KXZ*(b**2)/(V0**2)],
+                         [Cnbdot*b/V0,           0,        2*mub*KXZ*(b**2)/(V0**2), -2*mub*KZ2*(b**2)/(V0**2)]])
         
         
     C2_asym=np.matrix([[CYb, CL, CYp*b/(2*V0), (CYr-4*mub)*b/(2*V0)],
-                        [0, 0, b/(2*V0), 0],
-                        [Clb, 0, Clp*b/(2*V0), Clr*b/(2*V0)],
-                        [Cnb, 0, Cnp*b/(2*V0), Cnr*b/(2*V0)]])
+                       [0,   0,  b/(2*V0),     0],
+                       [Clb, 0,  Clp*b/(2*V0), Clr*b/(2*V0)],
+                       [Cnb, 0,  Cnp*b/(2*V0), Cnr*b/(2*V0)]])
     C3_asym=np.matrix([[CYda, CYdr],
-                       [0, 0],
+                       [0,    0],
                        [Clda, Cldr],
                        [Cnda, Cndr]])
     
@@ -178,14 +179,14 @@ for i in range(len(name_sym_eigenm)):
     eig = np.linalg.eig(A)[0]
     print("Eigenvalue = {}".format(eig[2*i]))
     print("Analytical eigenvalue = {}".format(lambda_list_sym[i][0])) # "percentage off =",lambda_list_sym[i]/eig[2*i]*100)
-    print("Difference real = {}".format((np.absolute(np.real(lambda_list_sym[i][0])-np.real(eig[2*i])))/np.real(eig[2*i])*100))
-    print("Difference imaginary = {}".format((np.absolute(np.imag(lambda_list_sym[i][0])-np.imag(eig[2*i])))/np.imag(eig[2*i])*100))
+    print("Difference real = {}".format((np.real(lambda_list_sym[i][0])-np.real(eig[2*i]))/np.real(eig[2*i])*100))
+    print("Difference imaginary = {}".format((np.imag(lambda_list_sym[i][0])-np.imag(eig[2*i]))/np.imag(eig[2*i])*100))
     
     # simulate system response
     [y_sym,t_sym,x_sym] = lsim(sysSym, elevator_input, T)
     
     # collect the actual response data (from flight test)
-    #tlistu, delistu = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "Dadc1_tas", data)
+    tlistu, delistu = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "Dadc1_tas", data)
     tlista, delista = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "vane_AOA", data)
     tlistt, delistt = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "Ahrs1_Pitch", data)
     tlistq, delistq = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "Ahrs1_bPitchRate", data)
@@ -193,23 +194,31 @@ for i in range(len(name_sym_eigenm)):
     fig1, ax1 = plt.subplots(2, 2)
     fig1.suptitle("Symmetric: " + name_sym_eigenm[i])
     
-    #ax1[0,0].plot(tlistu-tlistu[0], delistu, label="test data")
-    ax1[0,0].plot(t_sym, y_sym[:,0], label="u", color="orange")
-    ax1[0,0].set(xlabel="elapsed time [s]", ylabel="u [m/s]", title="disturbance velocity")
+    ax1[0,0].plot(tlistu-tlistu[0], delistu-delistu[0], label="test data")
+    ax1[0,0].plot(tlistu-tlistu[0], (delistu-delistu[0])*1.1, label="+10% margin", linestyle="--")
+    ax1[0,0].plot(tlistu-tlistu[0], (delistu-delistu[0])*0.9, label="-10% margin", linestyle="--")
+    ax1[0,0].plot(t_sym, y_sym[:,0], label="simulated data")
+    ax1[0,0].set(xlabel="elapsed time [s]", ylabel="u [m/s]", title="absolute deviation from normal velocity")
     ax1[0,0].legend()
     
     ax1[0,1].plot(tlista-tlista[0], delista, label="test data")
-    ax1[0,1].plot(tlista-tlista[0], y_sym[:,1] + np.rad2deg(alpha0), label="simulated data$")
+    ax1[0,1].plot(tlista-tlista[0], delista*1.1, label="+10% margin", linestyle="--")
+    ax1[0,1].plot(tlista-tlista[0], delista*0.9, label="-10% margin", linestyle="--")
+    ax1[0,1].plot(tlista-tlista[0], y_sym[:,1] + np.rad2deg(alpha0), label="simulated data")
     ax1[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\alpha$ [°]", title="angle of attack")
     ax1[0,1].legend()
     
     ax1[1,0].plot(tlistt-tlistt[0], delistt, label="test data")
+    ax1[1,0].plot(tlistt-tlistt[0], delistt*1.1, label="+10% margin", linestyle="--")
+    ax1[1,0].plot(tlistt-tlistt[0], delistt*0.9, label="-10% margin", linestyle="--")
     ax1[1,0].plot(tlistt-tlistt[0], y_sym[:,2] + np.rad2deg(th0), label="simulated data")
     ax1[1,0].set(xlabel="elapsed time [s]", ylabel=r"$\theta$ [°]", title="pitch angle")
     ax1[1,0].legend()
     
     q0 = delistq[0]
     ax1[1,1].plot(tlistq-tlistq[0], delistq, label="test data")
+    ax1[1,1].plot(tlistq-tlistq[0], delistq*1.1, label="+10% margin", linestyle="--")
+    ax1[1,1].plot(tlistq-tlistq[0], delistq*0.9, label="-10% margin", linestyle="--")
     ax1[1,1].plot(tlistq-tlistq[0], y_sym[:,3] + q0, label="simulated data")
     ax1[1,1].set(xlabel="elapsed time [s]", ylabel=r"q [°/s]", title="pitch rate")
     ax1[1,1].legend()
@@ -236,7 +245,7 @@ for i in range(len(name_asym_eigenm)):
     print("\nSimulating "+name_asym_eigenm[i]+" ...")
     
     # collect the actual response data (from flight test)
-    tlistb, delistb = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Fms1_trueHeading", data)
+    #tlistb, delistb = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Fms1_trueHeading", data)
     tlisth, delisth = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_Roll", data)
     tlistp, delistp = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_bYawRate", data)
     tlistr, delistr = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "Ahrs1_bRollRate", data)
@@ -272,14 +281,16 @@ for i in range(len(name_asym_eigenm)):
     if name_asym_eigenm[i] == "Spiral":
         print("Eigenvalue = {}".format(eig[-1]))
         print("Analytical eigenvalue = {}".format(lambda_list_asym[-1]))
-        print("Difference Real = {}".format((np.absolute(np.real(lambda_list_asym[-1])-np.real(eig[-1])))/np.real(eig[-1])*100))
-        print("Difference Imaginary = {}".format((np.absolute(np.imag(lambda_list_asym[-1])-np.imag(eig[-1])))/np.imag(eig[-1])*100))
+        print("Difference Real = {}".format((np.real(lambda_list_asym[-1])-np.real(eig[-1]))/np.real(eig[-1])*100))
+        if np.imag(eig[-1]) != 0:
+            print("Difference Imaginary = {}".format((np.imag(lambda_list_asym[-1])-np.imag(eig[-1]))/np.imag(eig[-1])*100))
         
     else:
         print("Eigenvalue = {}".format(eig[i]))
         print("Analytical eigenvalue = {}".format(lambda_list_asym[i]))
-        print("Difference Real = {}".format((np.absolute(np.real(lambda_list_asym[i])-np.real(eig[i])))/np.real(eig[i])*100))
-        print("Difference Imaginary = {}".format((np.absolute(np.imag(lambda_list_asym[i])-np.imag(eig[i])))/np.imag(eig[i])*100))
+        print("Difference Real = {}".format((np.real(lambda_list_asym[i])-np.real(eig[i]))/np.real(eig[i])*100))
+        if np.imag(eig[i]) != 0:
+            print("Difference Imaginary = {}".format((np.imag(lambda_list_asym[i])-np.imag(eig[i]))/np.imag(eig[i])*100))
     
     
     # simulate system response
@@ -289,25 +300,31 @@ for i in range(len(name_asym_eigenm)):
     fig2, ax2 = plt.subplots(2, 2)
     fig2.suptitle("Asymmetric: " + name_asym_eigenm[i])
     
-    #ax2[0,0].plot(tlistb-tlistb[0], delistb, label="test data")
-    ax2[0,0].plot(tlistb-tlistb[0], y_asym[:,0], label="simulated data", color="orange")
+    ax2[0,0].plot((tlistr-tlistr[0])[:-1], scipy.integrate.cumtrapz(delistr, x=tlistr), label="test data")
+    ax2[0,0].plot((tlistr-tlistr[0])[:-1], y_asym[:-1,0], label="simulated data")
     ax2[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\beta$ [°]", title="sideslip angle")
     ax2[0,0].legend()
     
     phi0 = delisth[0]
     ax2[0,1].plot(tlisth-tlisth[0], delisth, label="test data")
+    ax2[0,1].plot(tlisth-tlisth[0], delisth*1.1, label="+10% margin", linestyle="--")
+    ax2[0,1].plot(tlisth-tlisth[0], delisth*0.9, label="-10% margin", linestyle="--")
     ax2[0,1].plot(tlisth-tlisth[0], y_asym[:,1] + phi0, label="simulated data")
     ax2[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\phi$ [°]", title="roll angle")
     ax2[0,1].legend()
     
     r0 = delistr[0]
     ax2[1,0].plot(tlistr-tlistr[0], delistr, label="test data")
+    ax2[1,0].plot(tlistr-tlistr[0], delistr*1.1, label="+10% margin", linestyle="--")
+    ax2[1,0].plot(tlistr-tlistr[0], delistr*0.9, label="-10% margin", linestyle="--")
     ax2[1,0].plot(tlistr-tlistr[0], y_asym[:,2] + r0, label="simulated data")
     ax2[1,0].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="yaw rate")
     ax2[1,0].legend()
     
     p0 = delistp[0]
     ax2[1,1].plot(tlistp-tlistp[0], delistp, label="test data")
+    ax2[1,1].plot(tlistp-tlistp[0], delistp*1.1, label="+10% margin", linestyle="--")
+    ax2[1,1].plot(tlistp-tlistp[0], delistp*0.9, label="-10% margin", linestyle="--")
     ax2[1,1].plot(tlistp-tlistp[0], y_asym[:,3] + p0, label="simulated data")
     ax2[1,1].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="roll rate")
     ax2[1,1].legend()
