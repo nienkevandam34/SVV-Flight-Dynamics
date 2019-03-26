@@ -140,8 +140,8 @@ if use_reference_data:
 
 else:
     # our times
-    T_st_sym = [(61,35), (58, 56)]
-    T_en_sym = [(62,20), (61, 4)]
+    T_st_sym = [(61,55), (59, 2)]
+    T_en_sym = [(62,0), (61, 8)]
 
 T_st_sym_s = [T_st_sym[0][0]*60 + T_st_sym[0][1], T_st_sym[1][0]*60 + T_st_sym[1][1]]
 T_en_sym_s = [T_en_sym[0][0]*60 + T_en_sym[0][1], T_en_sym[1][0]*60 + T_en_sym[1][1]]
@@ -225,8 +225,8 @@ if use_reference_data:
 
 else:
     # our times
-    T_st_asym = [(65,4), (63,3), (68,50)]
-    T_en_asym = [(68,0), (63,23), (69,20)]
+    T_st_asym = [(65,3), (63,2), (68,50)]
+    T_en_asym = [(65,15), (63,28), (70,41)]
 
 T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
 T_en_asym_s = [T_en_asym[0][0]*60 + T_en_asym[0][1], T_en_asym[1][0]*60 + T_en_asym[1][1], T_en_asym[2][0]*60 + T_en_asym[2][1]]
@@ -290,25 +290,25 @@ for i in range(len(name_asym_eigenm)):
     fig2.suptitle("Asymmetric: " + name_asym_eigenm[i])
     
     #ax2[0,0].plot(tlistb-tlistb[0], delistb, label="test data")
-    ax2[0,0].plot(tlistb-tlistb[0], y_asym[:,0], label=r"$\beta$", color="orange")
+    ax2[0,0].plot(tlistb-tlistb[0], y_asym[:,0], label="simulated data", color="orange")
     ax2[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\beta$ [°]", title="sideslip angle")
     ax2[0,0].legend()
     
     phi0 = delisth[0]
     ax2[0,1].plot(tlisth-tlisth[0], delisth, label="test data")
-    ax2[0,1].plot(tlisth-tlisth[0], y_asym[:,1] + phi0, label=r"$\phi$")
+    ax2[0,1].plot(tlisth-tlisth[0], y_asym[:,1] + phi0, label="simulated data")
     ax2[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\phi$ [°]", title="roll angle")
     ax2[0,1].legend()
     
     r0 = delistr[0]
     ax2[1,0].plot(tlistr-tlistr[0], delistr, label="test data")
-    ax2[1,0].plot(tlistr-tlistr[0], y_asym[:,2] + r0, label="p")
+    ax2[1,0].plot(tlistr-tlistr[0], y_asym[:,2] + r0, label="simulated data")
     ax2[1,0].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="yaw rate")
     ax2[1,0].legend()
     
     p0 = delistp[0]
     ax2[1,1].plot(tlistp-tlistp[0], delistp, label="test data")
-    ax2[1,1].plot(tlistp-tlistp[0], y_asym[:,3] + p0, label="r")
+    ax2[1,1].plot(tlistp-tlistp[0], y_asym[:,3] + p0, label="simulated data")
     ax2[1,1].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="roll rate")
     ax2[1,1].legend()
     
