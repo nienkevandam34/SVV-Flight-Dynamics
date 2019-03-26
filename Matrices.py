@@ -5,15 +5,16 @@ Spyder Editor
 This is a temporary script file.
 """
 from control import ss
-from control.matlab import step, impulse, initial, lsim
+from control.matlab import lsim
 
 import matplotlib.pyplot as plt
 
 import numpy as np
-import eigenvalues 
 
 import os
 
+
+import eigenvalues 
 
 import grafiekjesmakenyay
 
@@ -21,14 +22,18 @@ import Cit_par_new
 
 import read_mat_data
 
+
+
 # NOTE: the reference data and the real data have a different sign for the 
 # aileron (and maybe also for the rudder and elevator??)
 use_reference_data = False
 
 if use_reference_data:
     data_name = "reference_data.mat"
+    aileron_sign = 1
 else:
     data_name = os.path.join("flight data", "FTISxprt-20190318_124004.mat")
+    aileron_sign = -1
 
 data, unit, description, keys = read_mat_data.read_mat(data_name)
 
@@ -48,6 +53,8 @@ lambda_spiral = eigenvalues.findeigenvalues(CLarad, CD0, e, data, "Aperiodic Spi
 
 lambda_list_sym  = [lambda_short, lambda_phug]
 lambda_list_asym = [lambda_roll, lambda_dutch, lambda_spiral]
+
+
 
 def sysmat(C1,C2,C3):
     A = -np.linalg.inv(C1)*C2
@@ -145,7 +152,7 @@ for i in range(len(name_sym_eigenm)):
     
     # determine length of simulation (add the 0.1 to the end time to include 
     # the end time)
-    T = np.arange(0, T_en_sym[i][0]*60 + T_en_sym[i][1] - T_st_sym[i][0]*60 - T_st_sym[i][1] + 0.1, 0.1)
+    T = np.arange(0, T_en_sym_s[i] - T_st_sym_s[i] + 0.1, 0.1)
     
     # get elevator input from flight data (only elevator in symmetric 
     # condition) and use this as elevator input for the model
@@ -172,7 +179,7 @@ for i in range(len(name_sym_eigenm)):
     print("Difference imaginary = {}".format((np.absolute(np.imag(lambda_list_sym[i][0])-np.imag(eig[2*i])))/np.imag(eig[2*i])*100))
     
     # simulate system response
-    [y_sym,t_sym,x_sym] = lsim(sysSym, elevator_input, T)#lsim(sysSym, inp_sym[i], T)
+    [y_sym,t_sym,x_sym] = lsim(sysSym, elevator_input, T)
     
     # collect the actual response data (from flight test)
     #tlistu, delistu = grafiekjesmakenyay.plot_real_data(T_st_sym[i], T_en_sym[i], "Dadc1_tas", data)
@@ -206,8 +213,6 @@ for i in range(len(name_sym_eigenm)):
 
 
 
-
-
 name_asym_eigenm = ["Aperiodic Roll", "Dutch Roll", "Spiral"]
 
 if use_reference_data:
@@ -235,7 +240,7 @@ for i in range(len(name_asym_eigenm)):
     
     # determine length of simulation (add the 0.1 to the end time to include 
     # the end time)
-    T = np.arange(0, T_en_asym[i][0]*60 + T_en_asym[i][1] - T_st_asym[i][0]*60 - T_st_asym[i][1] + 0.1, 0.1)
+    T = np.arange(0, T_en_asym_s[i] - T_st_asym_s[i] + 0.1, 0.1)
     
     # get aileron and rudder input from flight data (for asymmetric condition) 
     # and use this as aileron and rudder input for the model
@@ -274,7 +279,7 @@ for i in range(len(name_asym_eigenm)):
     
     
     # simulate system response
-    [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((-1*aileron_input, -1*rudder_input)).T, T)
+    [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_sign*aileron_input, -1*rudder_input)).T, T)
     
     
     fig2, ax2 = plt.subplots(2, 2)
