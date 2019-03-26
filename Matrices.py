@@ -70,7 +70,7 @@ def sym_matrices(c, muc, V0, KY2, CX0, CXa, CXde, CXu, CXq, CZ0, CZa, CZadot,
     C1_sym=np.matrix([[-2*muc*c/(V0**2), 0, 0, 0],
                      [0, (CZadot-2*muc)*c/V0, 0, 0],
                      [0, 0, -c/V0, 0],
-                     [0, Cmadot*c/V0, 0, -2*muc*KY2*c/(V0**2)]])
+                     [0, Cmadot*c/V0, 0, -2*muc*KY2*c**2/(V0**2)]])
     
     C2_sym=np.matrix([[CXu/V0, CXa, CZ0, CXq*c/V0],
                      [CZu/V0, CZa, -CX0, (CZq+2*muc)*c/V0],
@@ -144,7 +144,7 @@ else:
 T_st_sym_s = [T_st_sym[0][0]*60 + T_st_sym[0][1], T_st_sym[1][0]*60 + T_st_sym[1][1]]
 T_en_sym_s = [T_en_sym[0][0]*60 + T_en_sym[0][1], T_en_sym[1][0]*60 + T_en_sym[1][1]]
 
-inp_sym = [-1.74, -0.3259]
+#inp_sym = [-1.74, -0.3259]
 
 for i in range(len(name_sym_eigenm)):
     
@@ -218,7 +218,7 @@ name_asym_eigenm = ["Aperiodic Roll", "Dutch Roll", "Spiral"]
 if use_reference_data:
     # reference times
     T_st_asym = [(59,10), (61,50), (65,22)]
-    T_en_asym = [(59,30), (62,35), (65,50)]
+    T_en_asym = [(59,30), (62,18), (65,50)]
 
 else:
     # our times

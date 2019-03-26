@@ -190,6 +190,8 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
         Tm_cgsh     = np.array([5.0, 5.0]) + 273.15    # K
         tot_FU_cgsh = np.array([881, 910]) * 0.453592  # kg
         
+        dxcg        = -0.05389589                      # thomas' calculation
+        
         # stationary measurement Elevator Trim Curve
         alpha_et   = np.array([5.3, 6.3, 7.3, 8.5, 4.5, 4.1, 3.4])                 # deg
         de_et      = np.array([0, -0.4, -0.9, -1.5, 0.4, 0.6, 1])                  # deg
@@ -212,6 +214,8 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
         Tm_cgsh     = np.array([-12.35, -12.2]) + 273.15               # K
         tot_FU_cgsh = np.array([1037, 1058.5]) * 0.453592              # kg
         
+        dxcg        = -0.05516095                                      # thomas' calculation
+        
         # stationary measurement Elevator Trim Curve
         alpha_et   = np.array([5.266666667, 6.333333333, 7.3, 8.616666667, 4.35, 3.733333333, 3.35])                          # deg
         de_et      = np.array([0.3, -0.2, -0.6, -1.25, 0.6, 0.8, 1.1])                                                        # deg
@@ -231,9 +235,7 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
     m_cgsh      = ramp_mass - tot_FU_cgsh
     W_cgsh      = m_cgsh*g
     
-    CL_cgsh = 2*W_cgsh/(rho_cgsh*S*VTAS_cgsh*VTAS_cgsh)
-    
-    dxcg      = -0.05389589                     # thomas' calculation from excel sheet m
+    CL_cgsh   = 2*W_cgsh/(rho_cgsh*S*VTAS_cgsh*VTAS_cgsh)
     CN        = (max(CL_cgsh) + min(CL_cgsh))/2
     dde_rad   = np.deg2rad(dde)
     Cmde      = -(1/dde_rad)*CN*(dxcg/c)        # elevator effectiveness [ ]
@@ -310,6 +312,10 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
     
     de_et_red   = d_e_eq_meas - 1/Cmde * Cmtc * (TCs-TC)
     
+    # reduced stick force curve
+    # Force for friction is neglected (see reader and appendix B of assignment)
+    F_stick_et_red = F_stick_et * Ws/W
+    
     
     if show_plots:
         print("Cmde = {}".format(Cmde))
@@ -346,7 +352,10 @@ def stat_meas_2(use_reference_data=False, show_plots=False):
         
         ax2[1,0].plot(V_et_red, F_stick_et, marker="o", linestyle="None")
         ax2[1,0].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel="F [N]", title="Real force vs reduced equivalent airspeed")
-    
+        
+        ax2[1,1].plot(V_et_red, F_stick_et_red, marker="o", linestyle="None")
+        ax2[1,1].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel="F [N]", title="Reduced Elevator Control Force Curve")
+        
     return Cmde, Cma
 
 
