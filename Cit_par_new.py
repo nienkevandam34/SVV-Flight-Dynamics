@@ -235,7 +235,6 @@ def stat_meas_2(ramp_mass, use_reference_data=False, show_plots=False):
     W_cgsh      = m_cgsh*g
     
     CL_cgsh   = 2*W_cgsh/(rho_cgsh*S*VTAS_cgsh*VTAS_cgsh)
-    print(CL_cgsh)
     CN        = (max(CL_cgsh) + min(CL_cgsh))/2
     dde_rad   = np.deg2rad(dde)
     Cmde      = -(1/dde_rad)*CN*(dxcg/c)        # elevator effectiveness [ ]
@@ -256,8 +255,8 @@ def stat_meas_2(ramp_mass, use_reference_data=False, show_plots=False):
     Cma       = -Cmde*dde_alpha
     
     # determine real thrust coefficient
-    T_ISA_et    = Temp0 + Tgrad*(hp_et)                                       # K
-    delta_T_et  = T_et - T_ISA_et                                               # -
+    T_ISA_et    = Temp0 + Tgrad*(hp_et) # K
+    delta_T_et  = T_et - T_ISA_et       # -
     
     thrust_calc_in_file = open("matlab.dat", "w")
     for i in range(len(delta_T_et)):
@@ -308,7 +307,7 @@ def stat_meas_2(ramp_mass, use_reference_data=False, show_plots=False):
     
     # reduced elevator deflection
     Cmtc        = -0.0064 # appendix C
-    d_e_eq_meas = 0.5
+    d_e_eq_meas = de_et
     
     de_et_red   = d_e_eq_meas - 1/Cmde * Cmtc * (TCs-TC)
     
@@ -321,40 +320,50 @@ def stat_meas_2(ramp_mass, use_reference_data=False, show_plots=False):
         print("Cmde = {}".format(Cmde))
         print("Cma = {}".format(Cma))
         
-        fig, ax = plt.subplots(2, 2)
+        fig, ax = plt.subplots(1, 1)
+        plt.rcParams.update({'font.size': 22})
+        #fig.suptitle("Elevator trim curves")
         
-        fig.suptitle("Elevator trim curves")
+        #ax[0,0].plot(alpha_et, de_et, marker="o", linestyle="None", label="Data")
+        #ax[0,0].plot(alpha_et, dde_alpha*alpha_et + intersect, label="Linear Fit")
+        #ax[0,0].set(xlabel=r"$\alpha$ [°]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs real angle of attack")
+        #ax[0,0].legend()
         
-        ax[0,0].plot(alpha_et, de_et, marker="o", linestyle="None", label="Data")
-        ax[0,0].plot(alpha_et, dde_alpha*alpha_et + intersect, label="Linear Fit")
-        ax[0,0].set(xlabel=r"$\alpha$ [°]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs real angle of attack")
-        ax[0,0].legend()
+        #ax[0,1].plot(Vc_et, de_et, marker="o", linestyle="None")
+        #ax[0,1].set(xlabel=r"$V_c$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs calibrated airspeed")
         
-        ax[0,1].plot(Vc_et, de_et, marker="o", linestyle="None")
-        ax[0,1].set(xlabel=r"$V_c$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs calibrated airspeed")
+        #ax[1,0].plot(V_et_red, de_et, marker="o", linestyle="None")
+        #ax[1,0].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs reduced equivalent airspeed")
         
-        ax[1,0].plot(V_et_red, de_et, marker="o", linestyle="None")
-        ax[1,0].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\delta_e$ [°]", title="Real deflection vs reduced equivalent airspeed")
+        ax.plot(V_et_red, de_et_red, marker="o", linestyle="None")
+        ax.set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\delta^*_e$ [°]", title="Reduced Elevator-Trim Curve")
         
-        ax[1,1].plot(V_et_red, de_et_red, marker="o", linestyle="None")
-        ax[1,1].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\star{\delta}_e$ [°]", title="Reduced Elevator-Trim Curve")
+        # maximize the plot before saving to get best figure quality
+        plt.get_current_fig_manager().window.showMaximized()
+        plt.pause(0.1)
+        plt.savefig("ReducedElevatorTrim", dpi=450, bbox_inches="tight")
         
         
-        fig2, ax2 = plt.subplots(2, 2)
+        fig2, ax2 = plt.subplots(1, 1)
+        plt.rcParams.update({'font.size': 22})
+        #fig2.suptitle("Stick force curves")
         
-        fig2.suptitle("Stick force curves")
+        #ax2[0,0].plot(alpha_et, F_stick_et, marker="o", linestyle="None")
+        #ax2[0,0].set(xlabel=r"$\alpha$ [°]", ylabel="F [N]", title="Real force vs real angle of attack")
         
-        ax2[0,0].plot(alpha_et, F_stick_et, marker="o", linestyle="None")
-        ax2[0,0].set(xlabel=r"$\alpha$ [°]", ylabel="F [N]", title="Real force vs real angle of attack")
+        #ax2[0,1].plot(Vc_et, F_stick_et, marker="o", linestyle="None")
+        #ax2[0,1].set(xlabel=r"$V_c$ [m/s]", ylabel="F [N]", title="Real force vs calibrated airspeed")
         
-        ax2[0,1].plot(Vc_et, F_stick_et, marker="o", linestyle="None")
-        ax2[0,1].set(xlabel=r"$V_c$ [m/s]", ylabel="F [N]", title="Real force vs calibrated airspeed")
+        #ax2[1,0].plot(V_et_red, F_stick_et, marker="o", linestyle="None")
+        #ax2[1,0].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel="F [N]", title="Real force vs reduced equivalent airspeed")
         
-        ax2[1,0].plot(V_et_red, F_stick_et, marker="o", linestyle="None")
-        ax2[1,0].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel="F [N]", title="Real force vs reduced equivalent airspeed")
+        ax2.plot(V_et_red, F_stick_et_red, marker="o", linestyle="None")
+        ax2.set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$F^*_e$ [N]", title="Reduced Elevator Control Force Curve")
         
-        ax2[1,1].plot(V_et_red, F_stick_et_red, marker="o", linestyle="None")
-        ax2[1,1].set(xlabel=r"$\tilde{V}_e$ [m/s]", ylabel=r"$\star{F}$ [N]", title="Reduced Elevator Control Force Curve")
+        # maximize the plot before saving to get best figure quality
+        plt.get_current_fig_manager().window.showMaximized()
+        plt.pause(0.1)
+        plt.savefig("ReducedElevatorControlForce", dpi=450, bbox_inches="tight")
         
     return Cmde, Cma
 
