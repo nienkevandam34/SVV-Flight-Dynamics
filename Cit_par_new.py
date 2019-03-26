@@ -213,7 +213,7 @@ def stat_meas_2(ramp_mass, use_reference_data=False, show_plots=False):
         Tm_cgsh     = np.array([-12.35, -12.2]) + 273.15               # K
         tot_FU_cgsh = np.array([1037, 1058.5]) * 0.453592              # kg
         
-        dxcg        = -0.05516095                                      # thomas' calculation
+        dxcg        = -0.05                                            # thomas' calculation
         
         # stationary measurement Elevator Trim Curve
         alpha_et   = np.array([5.266666667, 6.333333333, 7.3, 8.616666667, 4.35, 3.733333333, 3.35])                          # deg
@@ -235,6 +235,7 @@ def stat_meas_2(ramp_mass, use_reference_data=False, show_plots=False):
     W_cgsh      = m_cgsh*g
     
     CL_cgsh   = 2*W_cgsh/(rho_cgsh*S*VTAS_cgsh*VTAS_cgsh)
+    print(CL_cgsh)
     CN        = (max(CL_cgsh) + min(CL_cgsh))/2
     dde_rad   = np.deg2rad(dde)
     Cmde      = -(1/dde_rad)*CN*(dxcg/c)        # elevator effectiveness [ ]
