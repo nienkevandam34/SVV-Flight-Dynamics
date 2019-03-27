@@ -427,22 +427,22 @@ def stab_coef(tstart, tend, ramp_mass, CLarad, CD0, e, data):
     # Stabiblity derivatives
     
     CX0    = W * np.sin(th0) / (0.5 * rho * V0 ** 2 * S)
-    CXu    = -0.02792
-    CXa    = -0.47966
+    CXu    = -0.02792*1.7 #1.6
+    CXa    = -0.47966*0.83
     CXadot = +0.08330
     CXq    = -0.28170
     CXde   = -0.03728
     
     CZ0    = -W * np.cos(th0) / (0.5 * rho * V0 ** 2 * S)
-    CZu    = -0.37616
-    CZa    = -5.74340
+    CZu    = -0.37616*1.04 #1.05
+    CZa    = -5.74340*1.12 #1.15
     CZadot = -0.00350
-    CZq    = -5.66290
+    CZq    = -5.66290*1.23
     CZde   = -0.69612
     
     Cmu    = +0.06990
-    Cmadot = +0.17800
-    Cmq    = -8.79415
+    Cmadot = +0.17800*1.8
+    Cmq    = -8.79415*0.89 #0.92
     
     CYb    = -0.7500
     CYbdot =  0     

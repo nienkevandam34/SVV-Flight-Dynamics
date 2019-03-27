@@ -141,13 +141,15 @@ if use_reference_data:
 
 else:
     # our times
-    T_st_sym = [(61,55), (59, 2)]
+    T_st_sym = [(61,55), (58, 40)]
     T_en_sym = [(62,0), (61, 8)]
 
 T_st_sym_s = [T_st_sym[0][0]*60 + T_st_sym[0][1], T_st_sym[1][0]*60 + T_st_sym[1][1]]
 T_en_sym_s = [T_en_sym[0][0]*60 + T_en_sym[0][1], T_en_sym[1][0]*60 + T_en_sym[1][1]]
 
 #inp_sym = [-1.74, -0.3259]
+
+plt.rcParams.update({'font.size': 12})
 
 for i in range(len(name_sym_eigenm)):
     
@@ -202,7 +204,7 @@ for i in range(len(name_sym_eigenm)):
     #ax1[0,0].legend()
     
     ax1[0,0].plot(T, elevator_input)
-    ax1[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\delta_e$ [°]", title="Elevator deflection")
+    ax1[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\delta_e$ [°]", title="elevator deflection")
     #ax1[0,0].legend()
     
     ax1[0,1].plot(tlista-tlista[0], delista, label="test data")
@@ -219,11 +221,11 @@ for i in range(len(name_sym_eigenm)):
     ax1[1,0].set(xlabel="elapsed time [s]", ylabel=r"$\theta$ [°]", title="pitch angle")
     #ax1[1,0].legend()
     
-    q0 = delistq[0]
+    #q0 = delistq[0]
     ax1[1,1].plot(tlistq-tlistq[0], delistq)
-    ax1[1,1].plot(tlistq-tlistq[0], delistq*1.1, label="+10% margin", linestyle="--")
-    ax1[1,1].plot(tlistq-tlistq[0], delistq*0.9, label="-10% margin", linestyle="--")
-    ax1[1,1].plot(tlistq-tlistq[0], y_sym[:,3] + q0)
+    ax1[1,1].plot(tlistq-tlistq[0], delistq*1.1, linestyle="--")
+    ax1[1,1].plot(tlistq-tlistq[0], delistq*0.9, linestyle="--")
+    ax1[1,1].plot(tlistq-tlistq[0], y_sym[:,3])
     ax1[1,1].set(xlabel="elapsed time [s]", ylabel=r"q [°/s]", title="pitch rate")
     
     fig1.legend(fancybox=True)
@@ -239,8 +241,8 @@ if use_reference_data:
 
 else:
     # our times
-    T_st_asym = [(65,3), (63,2), (68,50)]
-    T_en_asym = [(65,15), (63,28), (70,41)]
+    T_st_asym = [(65,3), (63,2), (68,44)]
+    T_en_asym = [(65,17), (63,28), (71,15)]
 
 T_st_asym_s = [T_st_asym[0][0]*60 + T_st_asym[0][1], T_st_asym[1][0]*60 + T_st_asym[1][1], T_st_asym[2][0]*60 + T_st_asym[2][1]]
 T_en_asym_s = [T_en_asym[0][0]*60 + T_en_asym[0][1], T_en_asym[1][0]*60 + T_en_asym[1][1], T_en_asym[2][0]*60 + T_en_asym[2][1]]
@@ -263,14 +265,6 @@ for i in range(len(name_asym_eigenm)):
     # and use this as aileron and rudder input for the model
     dummy, aileron_input = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "delta_a", data)
     dummy, rudder_input  = grafiekjesmakenyay.plot_real_data(T_st_asym[i], T_en_asym[i], "delta_r", data)
-    
-    fig3, ax3 = plt.subplots(1, 2)
-    
-    ax3[0].plot(dummy, aileron_input, label="aileron")
-    ax3[0].legend()
-    
-    ax3[1].plot(dummy, rudder_input, label="test data")
-    ax3[1].legend()
     
     # build system matrices with stability constants
     (hp0, V0, alpha0, th0, m, e, CD0f, CLaf, W, muc, mub, KX2, KZ2, 
@@ -308,14 +302,18 @@ for i in range(len(name_asym_eigenm)):
     
     # simulate system response
     [y_asym,t_asym,x_sym] = lsim(sysAsym, np.vstack((aileron_sign*aileron_input, -1*rudder_input)).T, T)
-    
-    
+        
     fig2, ax2 = plt.subplots(2, 2)
     fig2.suptitle("Asymmetric: " + name_asym_eigenm[i])
     
-    ax2[0,0].plot((tlistr-tlistr[0])[:-1], scipy.integrate.cumtrapz(delistr, x=tlistr))
-    ax2[0,0].plot((tlistr-tlistr[0])[:-1], y_asym[:-1,0])
-    ax2[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\beta$ [°]", title="sideslip angle")
+    ax2[0,0].plot(dummy, aileron_input, label="aileron", color="gray")
+    ax2[0,0].plot(dummy, rudder_input, label="rudder", color="black")
+    ax2[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\delta$ [°]", title="control surface deflections")
+    #ax2[0,0].legend()
+    
+    #ax2[0,0].plot((tlistr-tlistr[0])[:-1], scipy.integrate.cumtrapz(delistr, x=tlistr))
+    #ax2[0,0].plot((tlistr-tlistr[0])[:-1], y_asym[:-1,0])
+    #ax2[0,0].set(xlabel="elapsed time [s]", ylabel=r"$\beta$ [°]", title="sideslip angle")
     #ax2[0,0].legend()
     
     phi0 = delisth[0]
@@ -326,19 +324,19 @@ for i in range(len(name_asym_eigenm)):
     ax2[0,1].set(xlabel="elapsed time [s]", ylabel=r"$\phi$ [°]", title="roll angle")
     #ax2[0,1].legend()
     
-    r0 = delistr[0]
+    #r0 = delistr[0]
     ax2[1,0].plot(tlistr-tlistr[0], delistr)
     ax2[1,0].plot(tlistr-tlistr[0], delistr*1.1, linestyle="--")
     ax2[1,0].plot(tlistr-tlistr[0], delistr*0.9, linestyle="--")
-    ax2[1,0].plot(tlistr-tlistr[0], y_asym[:,2] + r0)
+    ax2[1,0].plot(tlistr-tlistr[0], y_asym[:,2])
     ax2[1,0].set(xlabel="elapsed time [s]", ylabel="r [°/s]", title="yaw rate")
     #ax2[1,0].legend()
     
-    p0 = delistp[0]
+    #p0 = delistp[0]
     ax2[1,1].plot(tlistp-tlistp[0], delistp)
     ax2[1,1].plot(tlistp-tlistp[0], delistp*1.1, linestyle="--")
     ax2[1,1].plot(tlistp-tlistp[0], delistp*0.9, linestyle="--")
-    ax2[1,1].plot(tlistp-tlistp[0], y_asym[:,3] + p0)
+    ax2[1,1].plot(tlistp-tlistp[0], y_asym[:,3])
     ax2[1,1].set(xlabel="elapsed time [s]", ylabel="p [°/s]", title="roll rate")
     #ax2[1,1].legend()
     
